@@ -95,7 +95,7 @@ var lyr_Routescopie_5 = new ol.layer.Vector({
                 source:jsonSource_Routescopie_5, 
                 style: style_Routescopie_5,
                 popuplayertitle: "Routes copie",
-                interactive: false,
+                interactive: true,
     title: 'Routes copie<br />\
     <img src="styles/legend/Routescopie_5_0.png" /> 1<br />\
     <img src="styles/legend/Routescopie_5_1.png" /> 2<br />\
@@ -144,8 +144,8 @@ lyr_SW_Grid_1.set('fieldLabels', {'fid': 'no label', 'id': 'no label', 'left': '
 lyr_SW_Unplaced_grid_2.set('fieldLabels', {'fid': 'no label', 'id': 'no label', 'NAME': 'no label', });
 lyr_Triangulation_lines_3.set('fieldLabels', {'fid': 'no label', 'POINTA': 'no label', 'POINTB': 'no label', 'POINTC': 'no label', });
 lyr_Pointsalatoires_4.set('fieldLabels', {'fid': 'no label', 'id': 'no label', });
-lyr_Routescopie_5.set('fieldLabels', {'fid': 'no label', 'id': 'no label', 'NAME': 'no label', 'importance': 'no label', 'comm': 'no label', });
-lyr_SYSTEMScopie_6.set('fieldLabels', {'fid': 'hidden field', 'NAME': 'inline label - always visible', 'region_1': 'inline label - always visible', 'POIMILyn': 'hidden field', 'POIMILdesc': 'hidden field', 'POIECOyn': 'hidden field', 'POIECOdesc': 'hidden field', 'confl_side': 'hidden field', 'complete': 'hidden field', 'commentair': 'hidden field', 'POIFORyn': 'hidden field', 'POIFORdesc': 'hidden field', 'region_2': 'hidden field', 'loc_prec': 'hidden field', 'url_wookie': 'inline label - always visible', 'date_mod': 'inline label - always visible', 'picture': 'no label', 'illegal': 'hidden field', 'scale': 'hidden field', 'Source_1': 'hidden field', 'Source_2': 'hidden field', 'ALT_NAME': 'hidden field', 'Type1': 'hidden field', 'Type2': 'hidden field', });
+lyr_Routescopie_5.set('fieldLabels', {'fid': 'hidden field', 'id': 'hidden field', 'NAME': 'no label', 'importance': 'hidden field', 'comm': 'hidden field', });
+lyr_SYSTEMScopie_6.set('fieldLabels', {'fid': 'hidden field', 'NAME': 'no label', 'region_1': 'no label', 'POIMILyn': 'hidden field', 'POIMILdesc': 'hidden field', 'POIECOyn': 'hidden field', 'POIECOdesc': 'hidden field', 'confl_side': 'hidden field', 'complete': 'hidden field', 'commentair': 'hidden field', 'POIFORyn': 'hidden field', 'POIFORdesc': 'hidden field', 'region_2': 'hidden field', 'loc_prec': 'hidden field', 'url_wookie': 'no label', 'date_mod': 'no label', 'picture': 'no label', 'illegal': 'hidden field', 'scale': 'hidden field', 'Source_1': 'hidden field', 'Source_2': 'hidden field', 'ALT_NAME': 'hidden field', 'Type1': 'hidden field', 'Type2': 'no label', });
 lyr_SYSTEMScopie_6.on('precompose', function(evt) {
     evt.context.globalCompositeOperation = 'normal';
 });
