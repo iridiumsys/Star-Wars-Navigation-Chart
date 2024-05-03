@@ -370,7 +370,7 @@ map.on("rendercomplete", function(evt) {
         qgis2webAttribution.innerHTML = '<a href="https://github.com/tomchadwin/qgis2web">qgis2web</a> &middot; ';
         var olAttribution = document.createElement('li');
         olAttribution.innerHTML = '<a href="https://openlayers.org/">OpenLayers</a> &middot; ';
-        var qgisAttribution = document.createElement('li');
+        var wookieAttribution = document.createElement('li');
         wookieAttribution.innerHTML = '<a href="https://starwars.fandom.com/wiki/Main_Page/">Wookiepedia</a>';
         attributionList.insertBefore(qgis2webAttribution, firstLayerAttribution);
         attributionList.insertBefore(olAttribution, firstLayerAttribution);
