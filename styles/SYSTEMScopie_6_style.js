@@ -60,7 +60,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-                    else if (exp_SYSTEMScopie_6rule2_eval_expression(context)) && resolution >= 18 {
+                    else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 18) {
     return [new ol.style.Style({
         image: new ol.style.Icon({
             imgSize: [580, 580],
