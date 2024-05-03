@@ -26,7 +26,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 variables: {}
             };
             // Start of if blocks and style check logic
-            if (exp_SYSTEMScopie_6rule0_eval_expression(context) && resolution < 18) {
+            if (exp_SYSTEMScopie_6rule0_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 10.0 + size,
             stroke: new ol.style.Stroke({color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(209,10,13,1.0)'})}),
@@ -55,7 +55,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorYUnits: "pixels",
                         rotation: 1.047198,
                         src: "styles/amenity_firestation.svg"
-                    })
+                    }),
                 })];
             }
 
