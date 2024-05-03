@@ -87,6 +87,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         image: new ol.style.Circle({
                             radius: 10.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(209,10,13,1.0)' })
+                        })
                     })];
                 }
                 else {
@@ -95,7 +96,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         image: new ol.style.Circle({
                             radius: 10.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(209,10,13,1.0)' }),
-                        text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
+                            text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
+                        })
                     })]
                 };
                 }
