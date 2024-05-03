@@ -56,6 +56,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         rotation: 1.047198,
                         src: "styles/amenity_firestation.svg"
                     }),
+            text: ''
                 })];
             }
 
