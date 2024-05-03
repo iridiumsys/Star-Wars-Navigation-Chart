@@ -85,7 +85,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     // Style for resolution <= 18 without text
                     return [new ol.style.Style({
                         image: new ol.style.Circle({
-                            radius: 7.0 + size,
+                            radius: 5.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' })
                         })
                     })]
@@ -94,7 +94,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     // Style for resolution > 18 with text
                     return [new ol.style.Style({
                         image: new ol.style.Circle({
-                            radius: 7.0 + size,
+                            radius: 5.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' }),
                             text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
                         })
