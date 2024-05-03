@@ -50,12 +50,12 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         bufferWidth)
                 })];
             }
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution <= 0.05) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution <= 0.1) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
                         scale: 0.05517241379310345,
-                        anchor: [16, 16],
+                        anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
                         rotation: 1.047198,
@@ -64,7 +64,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution > 0.05) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution > 0.1) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -82,7 +82,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             }
 
             else if (exp_SYSTEMScopie_6rule3_eval_expression(context)) {
-                if (resolution > 0.05) {
+                if (resolution < 0.1) {
                     return [new ol.style.Style({
                         image: new ol.style.Circle({
                             radius: 5.0 + size,
