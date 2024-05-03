@@ -7,8 +7,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
         variables: {}
     };
     var value = '';
-    var labelText_up = "";
-    var labelText_dw = "";
+    var labelText_up = String(feature.get("NAME")).toUpperCase();
+    var labelText_dw = String(feature.get("NAME"));;
     size = 0;
     var labelFont = "11.700000000000001px \'Franklin Gothic Medium\', sans-serif";
     var labelFill = "#484848";
@@ -18,12 +18,12 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     var offsetX = 8;
     var offsetY = 3;
     var placement = 'point';
-    if (feature.get("NAME") !== null) {
-        labelText_up = String(feature.get("NAME")).toUpperCase();
-    }
-    if (feature.get("NAME") !== null) {
-        labelText_dw = String(feature.get("NAME"));
-    }
+    //if (feature.get("NAME") !== null) {
+      //  labelText_up = String(feature.get("NAME")).toUpperCase();
+    //}
+    //if (feature.get("NAME") !== null) {
+      //  labelText_dw = String(feature.get("NAME"));
+    //}
     
         function rules_SYSTEMScopie_6(feature, value) {
             var context = {
