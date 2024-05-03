@@ -27,24 +27,28 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             };
             // Start of if blocks and style check logic
             if (exp_SYSTEMScopie_6rule0_eval_expression(context)) {
-                      return [ new ol.style.Style({
-        image: new ol.style.Circle({radius: 10.0 + size,
-            stroke: new ol.style.Stroke({color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(209,10,13,1.0)'})}),
-        text: createTextStyle(feature, resolution, labelText.toUpperCase(), labelFont,
-                              labelFill, placement, bufferColor,
-                              bufferWidth)
-    })];
+                return [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 10.0 + size,
+                        stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(209,10,13,1.0)' })
+                    }),
+                    text: createTextStyle(feature, resolution, labelText.toUpperCase(), labelFont,
+                        labelFill, placement, bufferColor,
+                        bufferWidth)
+                })];
             }
 
-                    else if (exp_SYSTEMScopie_6rule1_eval_expression(context)) {
-                      return [ new ol.style.Style({
-        image: new ol.style.Circle({radius: 8.0 + size,
-            stroke: new ol.style.Stroke({color: 'rgba(36,36,36,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(236,228,155,1.0)'})}),
-        text: createTextStyle(feature, resolution, labelText.toUpperCase(), labelFont,
-                              labelFill, placement, bufferColor,
-                              bufferWidth)
-    })];
-                    }
+            else if (exp_SYSTEMScopie_6rule1_eval_expression(context)) {
+                return [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 8.0 + size,
+                        stroke: new ol.style.Stroke({ color: 'rgba(36,36,36,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(236,228,155,1.0)' })
+                    }),
+                    text: createTextStyle(feature, resolution, labelText.toUpperCase(), labelFont,
+                        labelFill, placement, bufferColor,
+                        bufferWidth)
+                })];
+            }
             else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 18) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
@@ -59,38 +63,53 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-                    else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 18) {
-    return [new ol.style.Style({
-        image: new ol.style.Icon({
-            imgSize: [580, 580],
-            scale: 0.05517241379310345,
-            anchor: [16, 16],
-            anchorXUnits: "pixels",
-            anchorYUnits: "pixels",
-            rotation: 1.047198,
-            src: "styles/amenity_firestation.svg"
-        }),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
-            labelFill, placement, bufferColor,
-            bufferWidth)
-    })];
-}
-                    else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution <18) {
-                      return [ new ol.style.Style({
-        image: new ol.style.Circle({radius: 5.6 + size,
-            stroke: new ol.style.Stroke({ color: 'rgba(24,24,24,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76 }), fill: new ol.style.Fill({ color: 'rgba(237,237,237,1.0)' })
-        })
-    })];
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 18) {
+                return [new ol.style.Style({
+                    image: new ol.style.Icon({
+                        imgSize: [580, 580],
+                        scale: 0.05517241379310345,
+                        anchor: [16, 16],
+                        anchorXUnits: "pixels",
+                        anchorYUnits: "pixels",
+                        rotation: 1.047198,
+                        src: "styles/amenity_firestation.svg"
+                    }),
+                    text: createTextStyle(feature, resolution, labelText, labelFont,
+                        labelFill, placement, bufferColor,
+                        bufferWidth)
+                })];
             }
-                    else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution >= 18) {
-                      return [new ol.style.Style({
-        image: new ol.style.Circle({radius: 5.6 + size,
-            stroke: new ol.style.Stroke({ color: 'rgba(24,24,24,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76 }), fill: new ol.style.Fill({ color: 'rgba(237,237,237,1.0)' })}),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
-                            labelFill, placement, bufferColor,
-                            bufferWidth)
-    })];
+
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context)) {
+                if (resolution <= 18) {
+                    // Style for resolution <= 18 without text
+                    return [new ol.style.Style({
+                        image: new ol.style.Icon({
+                            imgSize: [580, 580],
+                            scale: 0.05517241379310345,
+                            anchor: [16, 16],
+                            anchorXUnits: "pixels",
+                            anchorYUnits: "pixels",
+                            rotation: 1.047198,
+                            src: "styles/amenity_firestation.svg"
+                        })
+                    })];
             }
+                else {
+                    // Style for resolution > 18 with text
+                    return [new ol.style.Style({
+                        image: new ol.style.Icon({
+                            imgSize: [580, 580],
+                            scale: 0.05517241379310345,
+                            anchor: [16, 16],
+                            anchorXUnits: "pixels",
+                            anchorYUnits: "pixels",
+                            rotation: 1.047198,
+                            src: "styles/amenity_firestation.svg"
+                        }),
+                        text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
+    })];
+                }
                     else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 9.6 + size,
