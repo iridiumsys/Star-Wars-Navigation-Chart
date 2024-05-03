@@ -84,29 +84,17 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 if (resolution <= 18) {
                     // Style for resolution <= 18 without text
                     return [new ol.style.Style({
-                        image: new ol.style.Icon({
-                            imgSize: [580, 580],
-                            scale: 0.05517241379310345,
-                            anchor: [16, 16],
-                            anchorXUnits: "pixels",
-                            anchorYUnits: "pixels",
-                            rotation: 1.047198,
-                            src: "styles/amenity_firestation.svg"
-                        })
+                        image: new ol.style.Circle({
+                            radius: 10.0 + size,
+                            stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(209,10,13,1.0)' })
                     })];
                 }
                 else {
                     // Style for resolution > 18 with text
                     return [new ol.style.Style({
-                        image: new ol.style.Icon({
-                            imgSize: [580, 580],
-                            scale: 0.05517241379310345,
-                            anchor: [16, 16],
-                            anchorXUnits: "pixels",
-                            anchorYUnits: "pixels",
-                            rotation: 1.047198,
-                            src: "styles/amenity_firestation.svg"
-                        }),
+                        image: new ol.style.Circle({
+                            radius: 10.0 + size,
+                            stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }), fill: new ol.style.Fill({ color: 'rgba(209,10,13,1.0)' }),
                         text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
                     })]
                 };
