@@ -69,10 +69,10 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
                         scale: 0.05517241379310345,
-                        anchor: [16, 16],
+                        anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
-                        rotation: 1.047198,
+                        rotation: 0,
                         src: "styles/amenity_firestation.svg"
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont2,
@@ -106,7 +106,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 9.6 + size,
             stroke: new ol.style.Stroke({color: 'rgba(90,90,90,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(255,255,255,0.0)'})}),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
+        text: createTextStyle(feature, resolution, labelText, labelFont2,
                               labelFill, placement, bufferColor,
                               bufferWidth)
     })];
@@ -115,7 +115,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                       return [ new ol.style.Style({
         image: new ol.style.RegularShape({radius: 2.4 + size, points: 4,
             angle: Math.PI/4, stroke: new ol.style.Stroke({color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0}), fill: new ol.style.Fill({color: 'rgba(119,119,119,1.0)'})}),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
+        text: createTextStyle(feature, resolution, labelText, labelFont2,
                               labelFill, placement, bufferColor,
                               bufferWidth)
     })];
