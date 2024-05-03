@@ -357,12 +357,6 @@ map.on('singleclick', function(evt) {
     onSingleClick(evt);
 });
 
-map.getView().on('change:resolution', function (event) {
-    var resolution = event.target.getResolution();
-    lyr_SYSTEMScopie_6.setStyle(style_SYSTEMScopie_6(feature, resolution));
-});
-
-
 
 var attributionComplete = false;
 map.on("rendercomplete", function(evt) {
