@@ -9,6 +9,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     var value = '';
     size = 0;
     var labelFont = "11.700000000000001px \'Franklin Gothic Medium\', sans-serif";
+    var labelFont2 = "9px \'Franklin Gothic Medium\', sans-serif";
     var labelFill = "#484848";
     var bufferColor = "";
     var bufferWidth = 0;
@@ -63,7 +64,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 18) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context)) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -74,7 +75,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         rotation: 1.047198,
                         src: "styles/amenity_firestation.svg"
                     }),
-                    text: createTextStyle(feature, resolution, labelText, labelFont,
+                    text: createTextStyle(feature, resolution, labelText, labelFont2,
                         labelFill, placement, bufferColor,
                         bufferWidth)
                 })];
@@ -96,7 +97,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         image: new ol.style.Circle({
                             radius: 5.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' }),
-                            text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
+                            text: createTextStyle(feature, resolution, labelText, labelFont2, labelFill, placement, bufferColor, bufferWidth)
                         })
                     })]
                 };
