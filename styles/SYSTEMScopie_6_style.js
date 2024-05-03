@@ -109,9 +109,9 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         }),
                         text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
                     })]
+                };
                 }
-                }
-                    else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
+        else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 9.6 + size,
             stroke: new ol.style.Stroke({color: 'rgba(90,90,90,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(255,255,255,0.0)'})}),
