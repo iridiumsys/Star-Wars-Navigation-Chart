@@ -55,8 +55,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorYUnits: "pixels",
                         rotation: 1.047198,
                         src: "styles/amenity_firestation.svg"
-                    }),
-            text: ''
+                    })
                 })];
             }
 
@@ -76,15 +75,22 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             bufferWidth)
     })];
 }
-                    else if (exp_SYSTEMScopie_6rule3_eval_expression(context)) {
+                    else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution <18) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 5.6 + size,
-            stroke: new ol.style.Stroke({color: 'rgba(24,24,24,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76}), fill: new ol.style.Fill({color: 'rgba(237,237,237,1.0)'})}),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
-                              labelFill, placement, bufferColor,
-                              bufferWidth)
+            stroke: new ol.style.Stroke({ color: 'rgba(24,24,24,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76 }), fill: new ol.style.Fill({ color: 'rgba(237,237,237,1.0)' })
+        })
     })];
-                    }
+            }
+                    else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution >= 18) {
+                      return [new ol.style.Style({
+        image: new ol.style.Circle({radius: 5.6 + size,
+            stroke: new ol.style.Stroke({ color: 'rgba(24,24,24,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76 }), fill: new ol.style.Fill({ color: 'rgba(237,237,237,1.0)' })}),
+        text: createTextStyle(feature, resolution, labelText, labelFont,
+                            labelFill, placement, bufferColor,
+                            bufferWidth)
+    })];
+            }
                     else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 9.6 + size,
