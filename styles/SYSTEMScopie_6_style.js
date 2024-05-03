@@ -94,7 +94,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                             src: "styles/amenity_firestation.svg"
                         })
                     })];
-            }
+                }
                 else {
                     // Style for resolution > 18 with text
                     return [new ol.style.Style({
@@ -108,7 +108,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                             src: "styles/amenity_firestation.svg"
                         }),
                         text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
-    })];
+                    })]
+                }
                 }
                     else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
                       return [ new ol.style.Style({
