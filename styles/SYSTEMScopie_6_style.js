@@ -40,27 +40,41 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 8.0 + size,
             stroke: new ol.style.Stroke({color: 'rgba(36,36,36,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(236,228,155,1.0)'})}),
-        text: createTextStyle(feature, resolution, labelText, labelFont,
+        text: createTextStyle(feature, resolution, labelText.toUpperCase(), labelFont,
                               labelFill, placement, bufferColor,
                               bufferWidth)
     })];
                     }
-                    else if (exp_SYSTEMScopie_6rule2_eval_expression(context)) {
-                      return [ new ol.style.Style({
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 18) {
+                return [new ol.style.Style({
+                    image: new ol.style.Icon({
+                        imgSize: [580, 580],
+                        scale: 0.05517241379310345,
+                        anchor: [16, 16],
+                        anchorXUnits: "pixels",
+                        anchorYUnits: "pixels",
+                        rotation: 1.047198,
+                        src: "styles/amenity_firestation.svg"
+                    })
+                })];
+            }
+
+                    else if (exp_SYSTEMScopie_6rule2_eval_expression(context)) && resolution >= 18 {
+    return [new ol.style.Style({
         image: new ol.style.Icon({
-                  imgSize: [580, 580],
-                  scale: 0.05517241379310345,
-                  anchor: [16, 16],
-                  anchorXUnits: "pixels",
-                  anchorYUnits: "pixels",
-                  rotation: 1.047198,
-                  src: "styles/amenity_firestation.svg"
-            }),
+            imgSize: [580, 580],
+            scale: 0.05517241379310345,
+            anchor: [16, 16],
+            anchorXUnits: "pixels",
+            anchorYUnits: "pixels",
+            rotation: 1.047198,
+            src: "styles/amenity_firestation.svg"
+        }),
         text: createTextStyle(feature, resolution, labelText, labelFont,
-                              labelFill, placement, bufferColor,
-                              bufferWidth)
+            labelFill, placement, bufferColor,
+            bufferWidth)
     })];
-                    }
+}
                     else if (exp_SYSTEMScopie_6rule3_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 5.6 + size,
