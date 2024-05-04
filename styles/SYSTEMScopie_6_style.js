@@ -9,7 +9,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     var value = '';
     size = 0;
     var labelFont = "11.700000000000001px \'Franklin Gothic Medium\', sans-serif";
-    var labelFont2 = "9px \'Franklin Gothic Medium\', sans-serif";
+    var labelFont2 = "9px \'Franklin Gothic Italic\', sans-serif";
+    var labelFont3 = "10px \'Franklin Gothic Medium\', sans-serif";
     var labelFill = "#484848";
     var bufferColor = "";
     var bufferWidth = 0;
@@ -50,7 +51,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         bufferWidth)
                 })];
             }
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 0.08) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 0.085) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -64,7 +65,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 0.08) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 0.085) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -80,31 +81,32 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         bufferWidth)
                 })];
             }
-
-            else if (exp_SYSTEMScopie_6rule3_eval_expression(context)) {
-                if (resolution > 0.08) {
-                    return [new ol.style.Style({
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution >= 0.085) {
+                return [new ol.style.Style({
                         image: new ol.style.Circle({
                             radius: 5.0 + size,
                             stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' })
-                        })
+                        }),
+                    text: createTextStyle(feature, resolution, labelText, labelFont2,
+                        labelFill, placement, bufferColor,
+                        bufferWidth)
                     })]
+            };
+    }
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution < 0.085) {
+    return [new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 5.0 + size,
+            stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' })
+        })
+    })]
+};
                 }
-                else {
-                    return [new ol.style.Style({
-                        image: new ol.style.Circle({
-                            radius: 5.0 + size,
-                            stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }), fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' }),
-                            text: createTextStyle(feature, resolution, labelText, labelFont2, labelFill, placement, bufferColor, bufferWidth)
-                        })
-                    })]
-                };
-                }
-        else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
                       return [ new ol.style.Style({
         image: new ol.style.Circle({radius: 9.6 + size,
             stroke: new ol.style.Stroke({color: 'rgba(90,90,90,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52}), fill: new ol.style.Fill({color: 'rgba(255,255,255,0.0)'})}),
-        text: createTextStyle(feature, resolution, labelText, labelFont2,
+        text: createTextStyle(feature, resolution, labelText, labelFont3,
                               labelFill, placement, bufferColor,
                               bufferWidth)
     })];
