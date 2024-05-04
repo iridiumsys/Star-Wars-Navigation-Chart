@@ -9,8 +9,9 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     var value = '';
     size = 0;
     var labelFont = "11.700000000000001px \'Franklin Gothic Medium\', sans-serif";
-    var labelFont2 = "9px \'Franklin Gothic Italic\', sans-serif";
+    var labelFont2 = "9px \'Franklin Gothic \', italic sans-serif";
     var labelFont3 = "10px \'Franklin Gothic Medium\', sans-serif";
+    var labelOverflow = "true"
     var labelFill = "#484848";
     var bufferColor = "";
     var bufferWidth = 0;
@@ -78,7 +79,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         rotation: 0,
                         src: "styles/amenity_firestation.svg"
                     }),
-                    text: createTextStyle(feature, resolution, labelText, labelFont2,
+                    text: createTextStyle(feature, resolution, labelText, labelFont2,labelOverflow,
                         labelFill, placement, bufferColor,
                         bufferWidth)
                 })];
@@ -101,7 +102,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }),
                         fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' })
                     }),
-                    text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
+                    text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, labelOverflow, placement, bufferColor, bufferWidth)
                 })];
             }
             //ASTEROID FIELDS
