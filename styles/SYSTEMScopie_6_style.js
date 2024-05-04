@@ -58,7 +58,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [933, 742],
-                        scale: 0.028,
+                        scale: 0.038,
                         anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
@@ -72,7 +72,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [933, 742],
-                        scale: 0.028,
+                        scale: 0.038,
                         anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
