@@ -10,15 +10,25 @@
         <link rel="stylesheet" href="resources/fontawesome-all.min.css">
         <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
         <link rel="stylesheet" href="./resources/qgis2web.css">
-<style>
-.search-layer {
-  top: 65px;
-  left: .5em;
-}
-.ol-touch .search-layer {
-  top: 80px;
-}
-</style>
+        <style>
+            .search-layer {
+                top: 65px;
+                left: .5em;
+            }
+
+            .ol-touch .search-layer {
+                top: 80px;
+            }
+        </style>
+        <style>
+        .banner {
+            background-color: #000080;
+            color: #ffffff;
+            font-family: "Franklin Gothic Medium", sans-serif;
+            padding: 10px;
+            text-align: center;
+        }
+        </style>
         <style>
         html, body {
             background-color: #ffffff;
@@ -53,6 +63,9 @@
         <title></title>
     </head>
     <body>
+        <div class="banner">
+            <h1>Star Wars Navigation Chart</h1>
+        </div>
         <div id="map">
             <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
