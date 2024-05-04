@@ -94,14 +94,14 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution < 0.085) {
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution < 0.15) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 5.0 + size,
                         stroke: new ol.style.Stroke({ color: 'rgba(70,70,70,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.7 }),
                         fill: new ol.style.Fill({ color: 'rgba(249,249,249,1.0)' })
                     }),
-                    text: createTextStyle(feature, resolution, labelText, labelFont2, labelFill, placement, bufferColor, bufferWidth)
+                    text: createTextStyle(feature, resolution, labelText, labelFont, labelFill, placement, bufferColor, bufferWidth)
                 })];
             }
             //ASTEROID FIELDS
@@ -142,7 +142,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //'Wreck' AND scale < 4
-            else if (exp_SYSTEMScopie_6rule7_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule7_eval_expression(context) && resolution < 0.085) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 2.4 + size,
