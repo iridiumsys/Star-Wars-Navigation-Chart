@@ -11,17 +11,11 @@ var lyr_Region4_illustrator_0 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_Region4_illustrator_0, 
                 style: style_Region4_illustrator_0,
-                popuplayertitle: "Region4_illustrator",
+                popuplayertitle: "Rims",
                 interactive: false,
-    title: 'Region4_illustrator<br />\
-    <img src="styles/legend/Region4_illustrator_0_0.png" /> Deep Core<br />\
-    <img src="styles/legend/Region4_illustrator_0_1.png" /> Core<br />\
-    <img src="styles/legend/Region4_illustrator_0_2.png" /> Colonies<br />\
-    <img src="styles/legend/Region4_illustrator_0_3.png" /> Inner Rim<br />\
-    <img src="styles/legend/Region4_illustrator_0_4.png" /> Expansion Region<br />\
-    <img src="styles/legend/Region4_illustrator_0_5.png" /> Mid Rim<br />\
-    <img src="styles/legend/Region4_illustrator_0_6.png" /> Outer Rim<br />\
-    <img src="styles/legend/Region4_illustrator_0_7.png" /> <br />'
+    title: 'Rims<br />\
+    <img src="styles/legend/Region4_illustrator_0_0.png" /> Deep Core, Colonies, Expansion Region, Outer Rim<br />\
+    <img src="styles/legend/Region4_illustrator_0_1.png" /> Core, Inner Rim, Mid Rim, Deep Space<br />'
         });
 var format_SW_Grid_1 = new ol.format.GeoJSON();
 var features_SW_Grid_1 = format_SW_Grid_1.readFeatures(json_SW_Grid_1, 
@@ -34,9 +28,9 @@ var lyr_SW_Grid_1 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_SW_Grid_1, 
                 style: style_SW_Grid_1,
-                popuplayertitle: "SW_Grid",
+                popuplayertitle: "Grid",
                 interactive: false,
-                title: '<img src="styles/legend/SW_Grid_1.png" /> SW_Grid'
+                title: '<img src="styles/legend/SW_Grid_1.png" /> Grid'
             });
 var format_SW_Unplaced_grid_2 = new ol.format.GeoJSON();
 var features_SW_Unplaced_grid_2 = format_SW_Unplaced_grid_2.readFeatures(json_SW_Unplaced_grid_2, 
@@ -49,9 +43,9 @@ var lyr_SW_Unplaced_grid_2 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_SW_Unplaced_grid_2, 
                 style: style_SW_Unplaced_grid_2,
-                popuplayertitle: "SW_Unplaced_grid",
+                popuplayertitle: "(Grid of unlocated systems)",
                 interactive: false,
-                title: '<img src="styles/legend/SW_Unplaced_grid_2.png" /> SW_Unplaced_grid'
+                title: '<img src="styles/legend/SW_Unplaced_grid_2.png" /> (grid of unlocated systems)'
             });
 var format_Triangulation_lines_3 = new ol.format.GeoJSON();
 var features_Triangulation_lines_3 = format_Triangulation_lines_3.readFeatures(json_Triangulation_lines_3, 
@@ -64,9 +58,9 @@ var lyr_Triangulation_lines_3 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_Triangulation_lines_3, 
                 style: style_Triangulation_lines_3,
-                popuplayertitle: "Triangulation_lines",
+                popuplayertitle: "Off-road travel lines",
                 interactive: false,
-                title: '<img src="styles/legend/Triangulation_lines_3.png" /> Triangulation_lines'
+                title: '<img src="styles/legend/Triangulation_lines_3.png" /> Off-road travel lines'
             });
 var format_Pointsalatoires_4 = new ol.format.GeoJSON();
 var features_Pointsalatoires_4 = format_Pointsalatoires_4.readFeatures(json_Pointsalatoires_4, 
@@ -79,9 +73,9 @@ var lyr_Pointsalatoires_4 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_Pointsalatoires_4, 
                 style: style_Pointsalatoires_4,
-                popuplayertitle: "Points aléatoires",
+                popuplayertitle: "Random stars (aesthetics)",
                 interactive: false,
-                title: '<img src="styles/legend/Pointsalatoires_4.png" /> Points aléatoires'
+                title: '<img src="styles/legend/Pointsalatoires_4.png" /> Random stars (aesthetics)'
             });
 var format_Routescopie_5 = new ol.format.GeoJSON();
 var features_Routescopie_5 = format_Routescopie_5.readFeatures(json_Routescopie_5, 
@@ -94,14 +88,14 @@ var lyr_Routescopie_5 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_Routescopie_5, 
                 style: style_Routescopie_5,
-                popuplayertitle: "Routes copie",
+                popuplayertitle: "Travel routes",
                 interactive: true,
     title: 'Routes copie<br />\
-    <img src="styles/legend/Routescopie_5_0.png" /> 1<br />\
-    <img src="styles/legend/Routescopie_5_1.png" /> 2<br />\
-    <img src="styles/legend/Routescopie_5_2.png" /> 3<br />\
-    <img src="styles/legend/Routescopie_5_3.png" /> 4<br />\
-    <img src="styles/legend/Routescopie_5_4.png" /> <br />'
+    <img src="styles/legend/Routescopie_5_0.png" /> Main route<br />\
+    <img src="styles/legend/Routescopie_5_1.png" /> Secondary route<br />\
+    <img src="styles/legend/Routescopie_5_2.png" /> Smuggler route<br />\
+    <img src="styles/legend/Routescopie_5_3.png" /> Sectorial route<br />\
+    <img src="styles/legend/Routescopie_5_4.png" /> Other route<br />'
         });
 var format_SYSTEMScopie_6 = new ol.format.GeoJSON();
 var features_SYSTEMScopie_6 = format_SYSTEMScopie_6.readFeatures(json_SYSTEMScopie_6, 
@@ -114,14 +108,14 @@ var lyr_SYSTEMScopie_6 = new ol.layer.Vector({
                 declutter: false,
                 source:jsonSource_SYSTEMScopie_6, 
                 style: style_SYSTEMScopie_6,
-                popuplayertitle: "SYSTEMS copie",
+                popuplayertitle: "Systems and astronomical objects",
                 interactive: true,
-                title: 'SYSTEMS copie'
+                title: 'Systems and astronomical objects'
             });
 var group_Habillage = new ol.layer.Group({
                                 layers: [lyr_Region4_illustrator_0,lyr_SW_Grid_1,lyr_SW_Unplaced_grid_2,lyr_Triangulation_lines_3,lyr_Pointsalatoires_4,],
                                 fold: "open",
-                                title: "Habillage"});
+                                title: "Map layout"});
 
 lyr_Region4_illustrator_0.setVisible(true);lyr_SW_Grid_1.setVisible(true);lyr_SW_Unplaced_grid_2.setVisible(true);lyr_Triangulation_lines_3.setVisible(true);lyr_Pointsalatoires_4.setVisible(true);lyr_Routescopie_5.setVisible(true);lyr_SYSTEMScopie_6.setVisible(true);
 var layersList = [group_Habillage,lyr_Routescopie_5,lyr_SYSTEMScopie_6];
