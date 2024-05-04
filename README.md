@@ -6,3 +6,8 @@ This project is a synthesis of the Star Wars (tm) canon sources, collected from
 
 Firstly released as beta version on 2024/05/04, this project is still a work-in-progress.
 I'll be aware of all your constructive remarks or suggestions !
+
+Planned developments :
+- Aesthetic improvements
+- Routing functionality
+- Search functionality
