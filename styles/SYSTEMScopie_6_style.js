@@ -63,7 +63,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
                         rotation: 0,
-                        src: "styles/Planetary-03150x-1.png"
+                        src: "styles/Nebula.svg"
                     })
                 })];
             }
@@ -77,7 +77,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
                         rotation: 0,
-                        src: "styles/Planetary-03150x-1.png"
+                        src: "styles/Nebula.svg"
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont2,
                         labelFill, placement, bufferColor,
