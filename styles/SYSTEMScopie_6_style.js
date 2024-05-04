@@ -84,7 +84,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //MINOR SYSTEMS
-            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution >= 0.085) {
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution >= 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 5.0 + size,
@@ -94,7 +94,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution < 0.15) {
+            else if (exp_SYSTEMScopie_6rule3_eval_expression(context) && resolution < 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 5.0 + size,
