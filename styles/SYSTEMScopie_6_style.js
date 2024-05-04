@@ -124,7 +124,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont3,
                         labelFill, placement, bufferColor,
-                        bufferWidth,textAlign2)
+                        bufferWidth, { padding: [5, 5, 5, 5] })
                 })];
             }
             //'Space station' AND scale < 4
@@ -240,7 +240,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont,
                         labelFill, placement, bufferColor,
-                        bufferWidth)
+                        bufferWidth, { padding: [5, 5, 5, 5] })
                 })];
             }
             //Hyperspace Relay
