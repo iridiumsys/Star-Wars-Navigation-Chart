@@ -8,10 +8,9 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     };
     var value = '';
     size = 0;
-    var labelFont = "11.700000000000001px \'Franklin Gothic Medium\', sans-serif";
-    var labelFont2 = "9px \'Franklin Gothic \', sans-serif";
+    var labelFont = "11.7px \'Franklin Gothic Medium\', sans-serif";
+    var labelFont2 = "9px \'Franklin Gothic Medium \', sans-serif";
     var labelFont3 = "10px \'Franklin Gothic Medium\', sans-serif";
-    var labelOverflow = "true"
     var labelFill = "#484848";
     var bufferColor = "";
     var bufferWidth = 0;
@@ -55,7 +54,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //NEBULAE
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 0.085) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -64,12 +63,12 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
                         rotation: 0,
-                        src: "styles/Nebula.png"
+                        src: "styles/Planetary-03150x-1.png"
                     })
                 })];
             }
 
-            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 0.085) {
+            else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
                         imgSize: [580, 580],
@@ -78,7 +77,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
                         rotation: 0,
-                        src: "styles/Nebula.png"
+                        src: "styles/Planetary-03150x-1.png"
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont2,
                         labelFill, placement, bufferColor,
@@ -125,7 +124,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont3,
                         labelFill, placement, bufferColor,
-                        bufferWidth, labelAlign2)
+                        bufferWidth,textAlign2)
                 })];
             }
             //'Space station' AND scale < 4
