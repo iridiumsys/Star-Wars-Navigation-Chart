@@ -16,6 +16,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
     var bufferColor = "";
     var bufferWidth = 0;
     var textAlign = "left";
+    var textAlign2 = "right"
     var offsetX = 8;
     var offsetY = 3;
     var placement = 'point';
@@ -79,7 +80,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         rotation: 0,
                         src: "styles/amenity_firestation.svg"
                     }),
-                    text: createTextStyle(feature, resolution, labelText, labelFont2,labelOverflow,
+                    text: createTextStyle(feature, resolution, labelText, labelFont2, labelOverflow,
                         labelFill, placement, bufferColor,
                         bufferWidth)
                 })];
@@ -106,7 +107,16 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //ASTEROID FIELDS
-            else if (exp_SYSTEMScopie_6rule4_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule4_eval_expression(context) && resolution >= 0.3) {
+                return [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 9.6 + size,
+                        stroke: new ol.style.Stroke({ color: 'rgba(90,90,90,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 1.52 }),
+                        fill: new ol.style.Fill({ color: 'rgba(255,255,255,0.0)' })
+                    })
+                })];
+            }
+            else if (exp_SYSTEMScopie_6rule4_eval_expression(context) && resolution <0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 9.6 + size,
@@ -115,11 +125,19 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont3,
                         labelFill, placement, bufferColor,
-                        bufferWidth)
+                        bufferWidth, labelAlign2)
                 })];
             }
             //'Space station' AND scale < 4
-            else if (exp_SYSTEMScopie_6rule5_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule5_eval_expression(context) && resolution < 0.3 && resolution >= 0.085) {
+                return [new ol.style.Style({
+                    image: new ol.style.RegularShape({
+                        radius: 2.4 + size, points: 4,
+                        angle: Math.PI / 4, stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(119,119,119,1.0)' })
+                    })
+                })];
+            }
+            else if (exp_SYSTEMScopie_6rule5_eval_expression(context) && resolution < 0.085) {
                 return [new ol.style.Style({
                     image: new ol.style.RegularShape({
                         radius: 2.4 + size, points: 4,
@@ -143,6 +161,14 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //'Wreck' AND scale < 4
+            else if (exp_SYSTEMScopie_6rule7_eval_expression(context) && resolution < 0.3 && resolution >= 0.085) {
+                return [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 2.4 + size,
+                        stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(119,119,119,1.0)' })
+                    })
+                })];
+            }
             else if (exp_SYSTEMScopie_6rule7_eval_expression(context) && resolution < 0.085) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
@@ -167,7 +193,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //Black Hole
-            else if (exp_SYSTEMScopie_6rule9_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule9_eval_expression(context) && resolution < 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 6.8 + size,
@@ -182,7 +208,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             else if (exp_SYSTEMScopie_6rule10_eval_expression(context)) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
-                        radius: 4.0 + size,
+                        radius: 3.0 + size,
                         stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(241,241,241,1.0)' })
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont,
@@ -190,7 +216,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         bufferWidth)
                 }), new ol.style.Style({
                     image: new ol.style.Circle({
-                        radius: 4.0 + size,
+                        radius: 3.0 + size,
                         stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(241,241,241,1.0)' })
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont,
@@ -198,7 +224,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                         bufferWidth)
                 }), new ol.style.Style({
                     image: new ol.style.Circle({
-                        radius: 4.0 + size,
+                        radius: 3.0 + size,
                         stroke: new ol.style.Stroke({ color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(241,241,241,1.0)' })
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont,
@@ -207,7 +233,15 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //Anomaly
-            else if (exp_SYSTEMScopie_6rule11_eval_expression(context) && resolution < 0.085) {
+            else if (exp_SYSTEMScopie_6rule11_eval_expression(context) && resolution < 0.3 && resolution >= 0.085) {
+                return [new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 5 + size,
+                        stroke: new ol.style.Stroke({ color: 'rgba(53,38,60,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.0 }), fill: new ol.style.Fill({ color: 'rgba(98,78,115,1.0)' })
+                    })
+                })];
+            }
+            else if (exp_SYSTEMScopie_6rule11_eval_expression(context) && resolution < 0.85 ) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 5 + size,
@@ -219,7 +253,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //Hyperspace Relay
-            else if (exp_SYSTEMScopie_6rule12_eval_expression(context) && resolution < 0.085) {
+            else if (exp_SYSTEMScopie_6rule12_eval_expression(context) && resolution < 0.3) {
                       return [ new ol.style.Style({
         image: new ol.style.RegularShape({radius: 5.2 + size, points: 4,
             stroke: new ol.style.Stroke({color: 'rgba(35,35,35,1.0)', lineDash: null, lineCap: 'butt', lineJoin: 'miter', width: 0.76}), fill: new ol.style.Fill({color: 'rgba(247,247,247,1.0)'})}),
