@@ -57,8 +57,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution >= 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
-                        imgSize: [580, 580],
-                        scale: 0.05517241379310345,
+                        imgSize: [933, 742],
+                        scale: 0.038,
                         anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
@@ -71,8 +71,8 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
             else if (exp_SYSTEMScopie_6rule2_eval_expression(context) && resolution < 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Icon({
-                        imgSize: [580, 580],
-                        scale: 0.05517241379310345,
+                        imgSize: [933, 742],
+                        scale: 0.038,
                         anchor: [0, 0],
                         anchorXUnits: "pixels",
                         anchorYUnits: "pixels",
@@ -124,7 +124,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont3,
                         labelFill, placement, bufferColor,
-                        bufferWidth,textAlign2)
+                        bufferWidth, { padding: [5, 5, 5, 5] })
                 })];
             }
             //'Space station' AND scale < 4
@@ -204,7 +204,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                 })];
             }
             //Star Cluster
-            else if (exp_SYSTEMScopie_6rule10_eval_expression(context)) {
+            else if (exp_SYSTEMScopie_6rule10_eval_expression(context) && resolution >= 0.3) {
                 return [new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 5.0 + size,
@@ -240,7 +240,7 @@ var style_SYSTEMScopie_6 = function(feature, resolution){
                     }),
                     text: createTextStyle(feature, resolution, labelText, labelFont,
                         labelFill, placement, bufferColor,
-                        bufferWidth)
+                        bufferWidth, { padding: [5, 5, 5, 5] })
                 })];
             }
             //Hyperspace Relay
