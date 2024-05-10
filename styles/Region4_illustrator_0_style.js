@@ -5,7 +5,7 @@ function categories_Region4_illustrator_0(feature, value, size, resolution, labe
                        placement) {
                 switch(value.toString()) {case 'Deep Core':
                     return [ new ol.style.Style({
-        fill: new ol.style.Fill({color: 'rgba(206,218,245,1.0)'}),
+        fill: new ol.style.Fill({color: 'rgba(241,242,255,1.0)'}),
         text: createTextStyle(feature, resolution, labelText, labelFont,
                               labelFill, placement, bufferColor,
                               bufferWidth)
@@ -21,7 +21,7 @@ case 'Core':
                     break;
 case 'Colonies':
                     return [ new ol.style.Style({
-        fill: new ol.style.Fill({color: 'rgba(206,218,245,1.0)'}),
+                        fill: new ol.style.Fill({ color: 'rgba(241,242,255,1.0)'}),
         text: createTextStyle(feature, resolution, labelText, labelFont,
                               labelFill, placement, bufferColor,
                               bufferWidth)
@@ -37,7 +37,7 @@ case 'Inner Rim':
                     break;
 case 'Expansion Region':
                     return [ new ol.style.Style({
-        fill: new ol.style.Fill({color: 'rgba(206,218,245,1.0)'}),
+                        fill: new ol.style.Fill({ color: 'rgba(241,242,255,1.0)'}),
         text: createTextStyle(feature, resolution, labelText, labelFont,
                               labelFill, placement, bufferColor,
                               bufferWidth)
@@ -53,7 +53,7 @@ case 'Mid Rim':
                     break;
 case 'Outer Rim':
                     return [ new ol.style.Style({
-        fill: new ol.style.Fill({color: 'rgba(206,218,245,1.0)'}),
+                        fill: new ol.style.Fill({ color: 'rgba(241,242,255,1.0)'}),
         text: createTextStyle(feature, resolution, labelText, labelFont,
                               labelFill, placement, bufferColor,
                               bufferWidth)
@@ -76,7 +76,7 @@ var style_Region4_illustrator_0 = function(feature, resolution){
     var value = feature.get("NAME");
     var labelText = "";
     size = 0;
-    var labelFont = "15.600000000000001px \'Open Sans\', sans-serif";
+    var labelFont = "15.600000000000001px \'Franklin Gothic Medium\', sans-serif";
     var labelFill = "#909090";
     var bufferColor = "";
     var bufferWidth = 0;
