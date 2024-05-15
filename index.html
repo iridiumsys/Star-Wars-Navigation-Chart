@@ -4,6 +4,7 @@
           <title>Star Wars Navigation Chart</title>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script src="https://cdnjs.com/libraries/openlayers" type="text/javascript"></script>  
           <link rel="stylesheet" href="https://openlayers.org/en/v3.8.2/css/ol.css" type="text/css">
           <style type="text/css">
               body {
@@ -19,8 +20,11 @@
       </head>
       <body>
           <div id="map"></div>
-          <script src="https://openlayers.org/en/v3.8.2/build/ol.js" type="text/javascript"></script>
+          
           <script type="text/javascript">
+          <!-- ol-ext -->
+          <link rel="stylesheet" href="../../dist/ol-ext.css" />
+          <script type="text/javascript" src="../../dist/ol-ext.js"></script>
               var map = new ol.Map({
                   target: 'map',
                   view: new ol.View({
