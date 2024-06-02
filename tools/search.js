@@ -23,15 +23,15 @@ function searchFeatureByName(name) {
 
 
 // Function to handle search
-function handleSearch() {
-    const searchInput = document.getElementById('search-input').value;
-    searchFeatureByName(searchInput);
-    // Reset the minimum zoom level after each search
-    map.getView().setMinZoom(originalMinZoom);
-    // Clear the map's view for the next search
-    map.getView().setCenter([0.00847486, -0.0109944]); // Reset center to initial position
-    map.getView().setZoom(18); // Reset zoom level
-}
+//function handleSearch() {
+//    const searchInput = document.getElementById('search-input').value;
+//    searchFeatureByName(searchInput);
+//    // Reset the minimum zoom level after each search
+//    map.getView().setMinZoom(originalMinZoom);
+//    // Clear the map's view for the next search
+//    map.getView().setCenter([0.00847486, -0.0109944]); // Reset center to initial position
+//    map.getView().setZoom(18); // Reset zoom level
+//}
 
 // Event listener for "Enter" key press on search input field
 document.getElementById('search-input').addEventListener('keydown', function(event) {
