@@ -8,6 +8,7 @@ function searchFeatureByName(name) {
             const geometry = feature.getGeometry();
             const extent = geometry.getExtent();
             map.getView().fit(extent, { duration: 1000 });
+            map.getView().setMinZoom(19);
             return;
         }
     }
