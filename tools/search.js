@@ -1,29 +1,21 @@
-import GeoJSON from 'ol/format/GeoJSON';
-import { Vector as VectorSource } from 'ol/source';
-import { SearchNominatim } from 'ol-ext/control/SearchNominatim';
+// Fonction de recherche
+function searchFeatureByName(name) {
+    const features = vectorSource.getFeatures();
+    for (let i = 0; i < features.length; i++) {
+        const feature = features[i];
+        const featureName = feature.get('NAME');
+        if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
+            const geometry = feature.getGeometry();
+            const extent = geometry.getExtent();
+            map.getView().fit(extent, { duration: 1000 });
+            return;
+        }
+    }
+    alert('Nom non trouvÃ©');
+}
 
-
-// Charger les données GeoJSON
-fetch('./layers/systems.geojson')
-    .then(response => response.json())
-    .then(json => {
-        // Créer la source et la couche vectorielle
-        const vectorSource = new VectorSource({
-            features: new GeoJSON().readFeatures(json, {
-                featureProjection: 'EPSG:3395'
-            })
-        });
-
-//        const vectorLayer = new VectorLayer({
-//            source: vectorSource
-//        });
-
-// Créer le contrôle de recherche
-const searchControl = new SearchNominatim({
-    source: vectorSource,
-    property: ['NAME', 'ALT_NAME']
+// Ajouter un Ã©couteur d'Ã©vÃ©nement au bouton de recherche
+document.getElementById('search-button').addEventListener('click', function() {
+    const searchInput = document.getElementById('search-input').value;
+    searchFeatureByName(searchInput);
 });
-
-// Ajouter le contrôle de recherche à la carte
-map.addControl(searchControl);
-  });
