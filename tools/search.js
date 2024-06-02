@@ -1,6 +1,6 @@
 // Fonction de recherche
 function searchFeatureByName(name) {
-    const features = vectorSource.getFeatures();
+    const features = Systems_json_source.getFeatures();
     for (let i = 0; i < features.length; i++) {
         const feature = features[i];
         const featureName = feature.get('NAME');
@@ -11,7 +11,7 @@ function searchFeatureByName(name) {
             return;
         }
     }
-    alert('Nom non trouvé');
+    alert('Name not found');
 }
 
 // Ajouter un écouteur d'événement au bouton de recherche
