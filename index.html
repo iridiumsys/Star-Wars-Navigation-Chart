@@ -59,22 +59,43 @@
             outline: none;
         }
 
-        .search-container button {
-            padding: 5px;
+        .search-container button#search-button {
+            padding: 5px 10px;
             border: none;
-            background: none;
-            font-size: 20px;
-            color: white;
+            border-radius: 3px;
+            background: #9cd0f3;
+            color: black;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 16px;
             cursor: pointer;
-            transition: color 0.3s;
+            transition: background 0.3s;
         }
 
-        .search-container button:hover {
-            color: #9cd0f3;
+        .search-container button#search-button:hover {
+            background: #79aaca;
         }
 
-        .ol-zoom {
-            bottom: 55px !important;
+        .toggle-background-container {
+            position: absolute;
+            bottom: 55px;
+            right: 10px;
+            z-index: 1000;
+        }
+
+        .toggle-background-container button {
+            padding: 10px;
+            border: none;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(122, 181, 217, 0.5);
+            transition: background 0.3s;
+        }
+
+        .toggle-background-container button:hover {
+            background: #9cd0f3;
         }
     </style>
 </head>
@@ -82,8 +103,10 @@
     <div id="map"></div>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search a system">
-        <button id="toggle-background"><i class="fas fa-stars"></i></button>
         <button id="search-button">Search</button>
+    </div>
+    <div class="toggle-background-container">
+        <button id="toggle-background"><i class="fas fa-star"></i></button>
     </div>
     <script>
         var map = new ol.Map({
