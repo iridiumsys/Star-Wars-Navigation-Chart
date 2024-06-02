@@ -177,7 +177,7 @@
 //FUNCTION SEARCH
         function handleSearch() {
   const searchInput = document.getElementById('search-input').value;
-  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === SystemsSource);
+  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
   if (!vectorLayer) {
     alert('No vector layer found');
     return;
