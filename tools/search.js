@@ -28,3 +28,5 @@ function handleSearch() {
     alert('Object not found');
   }
 }
+
+document.getElementById('search-button').addEventListener('click', handleSearch);
