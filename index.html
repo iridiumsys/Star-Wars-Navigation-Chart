@@ -96,12 +96,12 @@
         const Systems_json_source = new ol.source.Vector({
             url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
             format: new ol.format.GeoJSON(),
-            projection: 'EPSG:3395' // Set the projection
+            projection: 'EPSG:3857' // Set the projection
         });
 
         const transparentStyle = new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 0, // Pas de cercle
+                radius: 0.5, // Pas de cercle
                 fill: new ol.style.Fill({
                     color: 'rgba(0, 0, 0, 0)' // Couleur totalement transparente
                 }),
