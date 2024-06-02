@@ -7,22 +7,27 @@ const initialZoom = 18;
 
 // Fonction de recherche
 function searchFeatureByName(name) {
-    const features = systemsSource.getFeatures();
-    for (let i = 0; i < features.length; i++) {
-        const feature = features[i];
-        const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
-        console.log('Feature Name:', featureName); // Log feature name
-        if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
-            const geometry = feature.getGeometry();
-            const extent = geometry.getExtent();
-            console.log('Extent:', extent); // Log extent
-            map.getView().fit(extent, { duration: 1000 });
-            // Set a minimum zoom level after zooming
-            map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-            return;
-        }
+  const features = systemsSource.getFeatures();
+  let foundFeature = null;
+  for (let i = 0; i < features.length; i++) {
+    const feature = features[i];
+    const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
+    console.log('Feature Name:', featureName); // Log feature name
+    if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
+      foundFeature = feature;
+      break;
     }
+  }
+  if (foundFeature) {
+    const geometry = foundFeature.getGeometry();
+    const extent = geometry.getExtent();
+    console.log('Extent:', extent); // Log extent
+    map.getView().fit(extent, { duration: 1000 });
+    // Set a minimum zoom level after zooming
+    map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
+  } else {
     alert('Object not found');
+  }
 }
 
 // Function to handle search
