@@ -1,19 +1,18 @@
-// Store the original minimum zoom level
-const originalMinZoom = map.getView().getMinZoom();
-
-// Store the initial center coordinates and zoom level
-const initialCenter = [0.00847486, -0.0109944];
-const initialZoom = 18;
-
-// Fonction de recherche
-function searchFeatureByName(name) {
-  const features = systemsSource.getFeatures();
+function handleSearch() {
+  const searchInput = document.getElementById('search-input').value;
+  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === SystemsSource);
+  if (!vectorLayer) {
+    alert('No vector layer found');
+    return;
+  }
+  const vectorSource = vectorLayer.getSource();
+  const features = vectorSource.getFeatures();
   let foundFeature = null;
   for (let i = 0; i < features.length; i++) {
     const feature = features[i];
     const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
     console.log('Feature Name:', featureName); // Log feature name
-    if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
+    if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
       foundFeature = feature;
       break;
     }
@@ -29,24 +28,3 @@ function searchFeatureByName(name) {
     alert('Object not found');
   }
 }
-
-// Function to handle search
-function handleSearch() {
-    const searchInput = document.getElementById('search-input').value;
-    searchFeatureByName(searchInput);
-    // Reset the minimum zoom level after each search
-    map.getView().setMinZoom(originalMinZoom);
-    // Clear the map's view for the next search
-    map.getView().setCenter(initialCenter); // Reset center to initial position
-    map.getView().setZoom(initialZoom); // Reset zoom level
-}
-
-// Event listener for "Enter" key press on search input field
-document.getElementById('search-input').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        handleSearch();
-    }
-});
-
-// Event listener for search button click
-document.getElementById('search-button').addEventListener('click', handleSearch);
