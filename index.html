@@ -94,11 +94,25 @@
         // Charger la couche des systèmes
         const Systems_json_source = new ol.source.Vector({
             url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
-            format: new ol.format.GeoJSON()
+            format: new ol.format.GeoJSON(),
+            projection: 'EPSG:3395' // Set the projection
+        });
+
+        const transparentStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 0, // Pas de cercle
+                fill: new ol.style.Fill({
+                    color: 'rgba(0, 0, 0, 0)' // Couleur totalement transparente
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0, 0, 0, 0)' // Couleur totalement transparente
+                })
+            })
         });
 
         const Systems_json_layer = new ol.layer.Vector({
-            source: Systems_json_source
+            source: Systems_json_source,
+            style: transparentStyle // Appliquer le style transparent
         });
 
         // Charger la couche de tuiles
@@ -108,7 +122,8 @@
                 minZoom: 16,
                 maxZoom: 22
             }),
-            attribution: 'V0.2'
+            attribution: 'V0.2',
+            projection: 'EPSG:3395' // Set the projection
         });
 
         // Ajouter les couches dans le bon ordre
