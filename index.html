@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- OpenLayers -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@6.6.1/dist/ol.css" />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@6.6.1/dist/ol.js"></script>
 
     <!-- ol-ext -->
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
@@ -16,9 +16,6 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-
-   <!-- Custom scripts
-   <script type="module" src="./tools/search.js" defer></script> -->
 
     <!-- Style -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -118,12 +115,7 @@
             view: new ol.View({
                 center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
                 zoom: 18,
-            }),
-            controls: ol.control.defaults().extend([
-                new ol.control.Zoom({
-                    className: 'custom-zoom'
-                })
-            ])
+            })
         });
 
         var backgroundLayers = [
@@ -161,66 +153,61 @@
 
         var transparentStyle = new ol.style.Style({
             image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)'
-                })
-            })
-        });
+    radius: 0.5,
+    fill: new ol.style.Fill({
+        color: 'rgba(0, 0, 0, 0)'
+    }),
+    stroke: new ol.style.Stroke({
+        color: 'rgba(0, 0, 0, 0)'
+    })
+});
 
-        var systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle
-        });
+var systemsLayer = new ol.layer.Vector({
+    source: systemsSource,
+    style: transparentStyle
+});
 
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
-        map.addLayer(systemsLayer);
+map.addLayer(backgroundLayers[currentBackgroundIndex]);
+map.addLayer(systemsLayer);
 
-        // Store the original minimum zoom level
-        const originalMinZoom = map.getView().getMinZoom();
+// Store the original minimum zoom level
+const originalMinZoom = map.getView().getMinZoom();
 
-        // Store the initial center coordinates and zoom level
-        const initialCenter = ol.proj.fromLonLat([0.00847486, -0.0109944]);
-        const initialZoom = 18;
-
-        // Fonction de recherche
-        function searchFeatureByName(name) {
-            const features = systemsSource.getFeatures();
-            for (let i = 0; i < features.length; i++) {
-                const feature = features[i];
-                const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
-                console.log('Feature Name:', featureName); // Log feature name
-                if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
-                    const geometry = feature.getGeometry();
-                    const extent = geometry.getExtent();
-                    console.log('Extent:', extent); // Log extent
-                    map.getView().fit(extent, { duration: 1000 });
-                    // Set a minimum zoom level after zooming
-                    map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-                    return;
-                }
-            }
-            alert('Object not found');
+// Function to handle search
+function searchFeatureByName(name) {
+    const features = systemsSource.getFeatures();
+    for (let i = 0; i < features.length; i++) {
+        const feature = features[i];
+        const featureName = feature.get('NAME'); // Ensure that the name field in GeoJSON is "NAME"
+        console.log('Feature Name:', featureName); // Log feature name
+        if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
+            const geometry = feature.getGeometry();
+            const extent = geometry.getExtent();
+            console.log('Extent:', extent); // Log extent
+            map.getView().fit(extent, { duration: 1000 });
+            // Set a minimum zoom level after zooming
+            map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
+            return;
         }
+    }
+    alert('Object not found');
+}
 
-        // Function to handle search
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value;
-            searchFeatureByName(searchInput);
-        }
+// Function to handle search
+function handleSearch() {
+    const searchInput = document.getElementById('search-input').value;
+    searchFeatureByName(searchInput);
+}
 
-        // Event listener for "Enter" key press on search input field
-        document.getElementById('search-input').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                handleSearch();
-            }
-        });
+// Event listener for "Enter" key press on search input field
+document.getElementById('search-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        handleSearch();
+    }
+});
 
-        // Event listener for search button click
-        document.getElementById('search-button').addEventListener('click', handleSearch);
-    </script>
+// Event listener for search button click
+document.getElementById('search-button').addEventListener('click', handleSearch);
+</script>
 </body>
 </html>
