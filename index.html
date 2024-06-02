@@ -18,6 +18,7 @@
     <script type="module" src="./tools/search.js"></script>
 
     <!-- Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
             margin: 0;
@@ -29,22 +30,50 @@
             height: 100%;
         }
                 
+                }
         .search-container {
             position: absolute;
             top: 10px;
-            left: 10px;
-            background: white;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
             padding: 10px;
             border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+        }
+        .search-container input {
+            padding: 5px;
+            border: none;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 16px;
+            color: #00FFFF;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .search-container button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            background: #00FFFF;
+            color: black;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .search-container button:hover {
+            background: #00CCCC;
         }
     </style>
 </head>
 <body>
     <div id="map"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Rechercher un nom">
-        <button id="search-button">Rechercher</button>
+        <input type="text" id="search-input" placeholder="Search a system">
+        <button id="search-button">Search</button>
     </div>
     <script>
         var map = new ol.Map({
@@ -76,7 +105,7 @@ const Systems_json_layer = new ol.layer.Vector({
             attribution: 'V0.2'
         });
         
-        map.addLayer(Systems_json_layer, Space_tile_layer);
+        map.addLayer(Space_tile_layer, Systems_json_layer);
     </script>
 </body>
 </html>
