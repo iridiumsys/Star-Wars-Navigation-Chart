@@ -7,7 +7,7 @@ const initialZoom = 18;
 
 // Fonction de recherche
 function searchFeatureByName(name) {
-    const features = SystemsSource.getFeatures();
+    const features = systemsSource.getFeatures();
     for (let i = 0; i < features.length; i++) {
         const feature = features[i];
         const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
