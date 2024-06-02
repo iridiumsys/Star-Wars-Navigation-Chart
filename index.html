@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <!-- OpenLayers -->
+    <!-- OpenLayers -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
 
@@ -14,11 +14,12 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
     <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
     <!-- Custom scripts -->
     <script type="module" src="./tools/search.js"></script>
 
-    <!-- Style -->
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <!-- Style -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
@@ -59,19 +60,21 @@
         }
 
         .search-container button {
-            padding: 5px 10px;
+            padding: 5px;
             border: none;
-            border-radius: 3px;
-            background: #9cd0f3;
-            color: black;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 16px;
+            background: none;
+            font-size: 20px;
+            color: white;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: color 0.3s;
         }
 
         .search-container button:hover {
-            background: #79aaca;
+            color: #9cd0f3;
+        }
+
+        .ol-zoom {
+            bottom: 55px !important;
         }
     </style>
 </head>
@@ -79,57 +82,70 @@
     <div id="map"></div>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search a system">
+        <button id="toggle-background"><i class="fas fa-stars"></i></button>
         <button id="search-button">Search</button>
     </div>
     <script>
-        // Initialisation de la carte
         var map = new ol.Map({
             target: 'map',
             view: new ol.View({
                 center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
                 zoom: 18,
-                //projection: 'EPSG:3857' // Setting projection
             })
         });
 
-        // Charger la couche des systèmes
-        const Systems_json_source = new ol.source.Vector({
-            url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
-            format: new ol.format.GeoJSON(),
-            //projection: 'EPSG:4326' // Set the projection
+        var backgroundLayers = [
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: './XYZ_Space/{z}/{x}/{y}.png',
+                    minZoom: 16,
+                    maxZoom: 22
+                }),
+                attribution: 'Space Background',
+            }),
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: './XYZ/{z}/{x}/{y}.png',
+                    minZoom: 16,
+                    maxZoom: 22
+                }),
+                attribution: 'White Background',
+            })
+            // Add more background layers if needed
+        ];
+
+        var currentBackgroundIndex = 0;
+
+        var toggleBackgroundButton = document.getElementById('toggle-background');
+        toggleBackgroundButton.addEventListener('click', function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+            map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
         });
 
-        const transparentStyle = new ol.style.Style({
+        var systemsSource = new ol.source.Vector({
+            url: './layers/systems.geojson',
+            format: new ol.format.GeoJSON(),
+        });
+
+        var transparentStyle = new ol.style.Style({
             image: new ol.style.Circle({
                 radius: 0.5,
                 fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)' // Couleur totalement transparente
+                    color: 'rgba(0, 0, 0, 0)'
                 }),
                 stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)' // Couleur totalement transparente
+                    color: 'rgba(0, 0, 0, 0)'
                 })
             })
         });
 
-        const Systems_json_layer = new ol.layer.Vector({
-            source: Systems_json_source,
-            style: transparentStyle // Appliquer le style transparent
+        var systemsLayer = new ol.layer.Vector({
+            source: systemsSource,
+            style: transparentStyle
         });
 
-        // Charger la couche de tuiles
-        var Space_tile_layer = new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: './XYZ_Space/{z}/{x}/{y}.png',
-                minZoom: 16,
-                maxZoom: 22
-            }),
-            attribution: 'V0.2',
-            //projection: 'EPSG:3395' // Set the projection
-        });
-
-        // Ajouter les couches dans le bon ordre
-        map.addLayer(Space_tile_layer);
-        map.addLayer(Systems_json_layer);
+        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+        map.addLayer(systemsLayer);
     </script>
 </body>
 </html>
