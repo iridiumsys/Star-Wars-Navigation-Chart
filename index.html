@@ -19,16 +19,20 @@
 
     <!-- Style -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
             margin: 0;
             padding: 0;
+            font-family: 'Urbanist', sans-serif;
         }
 
         html, body, #map {
             width: 100%;
             height: 100%;
         }
+
         .search-container {
             position: absolute;
             top: 10px;
@@ -41,6 +45,7 @@
             align-items: center;
             z-index: 1000; /* Ensure it is above the map */
         }
+
         .search-container input {
             padding: 5px;
             border: none;
@@ -52,6 +57,7 @@
             background: rgba(255, 255, 255, 0.1);
             outline: none;
         }
+
         .search-container button {
             padding: 5px 10px;
             border: none;
@@ -63,6 +69,7 @@
             cursor: pointer;
             transition: background 0.3s;
         }
+
         .search-container button:hover {
             background: #00CCCC;
         }
@@ -75,6 +82,7 @@
         <button id="search-button">Search</button>
     </div>
     <script>
+        // Initialisation de la carte
         var map = new ol.Map({
             target: 'map',
             view: new ol.View({
@@ -83,18 +91,17 @@
             })
         });
 
-        
+        // Charger la couche des systèmes
         const Systems_json_source = new ol.source.Vector({
-    url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
-    format: new ol.format.GeoJSON()
-});
+            url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
+            format: new ol.format.GeoJSON()
+        });
 
-const Systems_json_layer = new ol.layer.Vector({
-    source: Systems_json_source
-});
+        const Systems_json_layer = new ol.layer.Vector({
+            source: Systems_json_source
+        });
 
-        
-        
+        // Charger la couche de tuiles
         var Space_tile_layer = new ol.layer.Tile({
             source: new ol.source.XYZ({
                 url: './XYZ_Space/{z}/{x}/{y}.png',
@@ -103,8 +110,10 @@ const Systems_json_layer = new ol.layer.Vector({
             }),
             attribution: 'V0.2'
         });
-        
-        map.addLayer(Systems_json_layer, Space_tile_layer);
+
+        // Ajouter les couches dans le bon ordre
+        map.addLayer(Space_tile_layer);
+        map.addLayer(Systems_json_layer);
     </script>
 </body>
 </html>
