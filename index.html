@@ -111,12 +111,19 @@
     </div>
     <script>
         var map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            })
-        });
+    target: 'map',
+    view: new ol.View({
+        center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
+        zoom: 18,
+    }),
+    controls: [
+        new ol.control.Zoom({
+            className: 'custom-zoom'
+        }),
+        new ol.control.ZoomSlider()
+        // Add other controls here as needed
+    ]
+});
 
         var backgroundLayers = [
             new ol.layer.Tile({
