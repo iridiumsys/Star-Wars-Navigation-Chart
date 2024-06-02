@@ -1,6 +1,10 @@
 // Store the original minimum zoom level
 const originalMinZoom = map.getView().getMinZoom();
 
+// Store the initial center coordinates and zoom level
+const initialCenter = [0.00847486, -0.0109944];
+const initialZoom = 18;
+
 // Fonction de recherche
 function searchFeatureByName(name) {
     const features = Systems_json_source.getFeatures();
@@ -21,17 +25,16 @@ function searchFeatureByName(name) {
     alert('Object not found');
 }
 
-
 // Function to handle search
-//function handleSearch() {
-//    const searchInput = document.getElementById('search-input').value;
-//    searchFeatureByName(searchInput);
-//    // Reset the minimum zoom level after each search
-//    map.getView().setMinZoom(originalMinZoom);
-//    // Clear the map's view for the next search
-//    map.getView().setCenter([0.00847486, -0.0109944]); // Reset center to initial position
-//    map.getView().setZoom(18); // Reset zoom level
-//}
+function handleSearch() {
+    const searchInput = document.getElementById('search-input').value;
+    searchFeatureByName(searchInput);
+    // Reset the minimum zoom level after each search
+    map.getView().setMinZoom(originalMinZoom);
+    // Clear the map's view for the next search
+    map.getView().setCenter(initialCenter); // Reset center to initial position
+    map.getView().setZoom(initialZoom); // Reset zoom level
+}
 
 // Event listener for "Enter" key press on search input field
 document.getElementById('search-input').addEventListener('keydown', function(event) {
