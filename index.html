@@ -96,7 +96,7 @@
         const Systems_json_source = new ol.source.Vector({
             url: './layers/systems.geojson',  // Remplacer par le chemin correct de votre fichier GeoJSON
             format: new ol.format.GeoJSON(),
-            projection: 'EPSG:3857' // Set the projection
+            projection: 'EPSG:4326' // Set the projection
         });
 
         const transparentStyle = new ol.style.Style({
