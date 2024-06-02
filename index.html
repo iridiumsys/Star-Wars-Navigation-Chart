@@ -149,7 +149,7 @@
             map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
         });
 
-        var systemsSource = new ol.source.Vector({
+        var SystemsSource = new ol.source.Vector({
             url: './layers/systems.geojson',
             format: new ol.format.GeoJSON(),
         });
