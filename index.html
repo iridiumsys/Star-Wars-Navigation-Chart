@@ -177,44 +177,6 @@ var systemsLayer = new ol.layer.Vector({
 map.addLayer(backgroundLayers[currentBackgroundIndex]);
 map.addLayer(systemsLayer);
 
-// Store the original minimum zoom level
-const originalMinZoom = map.getView().getMinZoom();
-
-// Function to handle search
-function searchFeatureByName(name) {
-    const features = systemsSource.getFeatures();
-    for (let i = 0; i < features.length; i++) {
-        const feature = features[i];
-        const featureName = feature.get('NAME'); // Ensure that the name field in GeoJSON is "NAME"
-        console.log('Feature Name:', featureName); // Log feature name
-        if (featureName && featureName.toLowerCase() === name.toLowerCase()) {
-            const geometry = feature.getGeometry();
-            const extent = geometry.getExtent();
-            console.log('Extent:', extent); // Log extent
-            map.getView().fit(extent, { duration: 1000 });
-            // Set a minimum zoom level after zooming
-            map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-            return;
-        }
-    }
-    alert('Object not found');
-}
-
-// Function to handle search
-function handleSearch() {
-    const searchInput = document.getElementById('search-input').value;
-    searchFeatureByName(searchInput);
-}
-
-// Event listener for "Enter" key press on search input field
-document.getElementById('search-input').addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        handleSearch();
-    }
-});
-
-// Event listener for search button click
-document.getElementById('search-button').addEventListener('click', handleSearch);
 </script>
 </body>
 </html>
