@@ -206,10 +206,11 @@
                 const geometry = foundFeature.getGeometry();
                 const extent = geometry.getExtent();
                 console.log('Extent:', extent); // Log extent
-                map.getView().fit(extent, { duration: 1000, maxZoom: 18 });
-                map.getView().setZoom(18); // Set the zoom level to a fixed value
+                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+                map.getView().setZoom(20); // Set the zoom level to a fixed value
             } else {
                 alert('System not found');
+                map.getView().setZoom(18); // Reset zoom if not found
             }
         }
 
