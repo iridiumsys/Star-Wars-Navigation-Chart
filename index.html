@@ -121,39 +121,38 @@
             })
         });
 
-        var backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'Space Background',
-            }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'White Background',
-            })
-            // Add more background layers if needed
-        ];
+var backgroundLayers = [
+    new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: './XYZ_Space/{z}/{x}/{y}.png',
+            minZoom: 16,
+            maxZoom: 22
+        }),
+        visible: true,
+        attribution: 'Space Background'
+    }),
+    new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: './XYZ/{z}/{x}/{y}.png',
+            minZoom: 16,
+            maxZoom: 22
+        }),
+        visible: false,
+        attribution: 'White Background'
+    })
+];
 
+backgroundLayers.forEach(layer => map.addLayer(layer));
 
-// BACKGROUND SWITCH FUNCTION
-        var currentBackgroundIndex = 0;
+var currentBackgroundIndex = 0;
 
-        var toggleBackgroundButton = document.getElementById('toggle-background');
+var toggleBackgroundButton = document.getElementById('toggle-background');
 toggleBackgroundButton.addEventListener('click', function() {
-    map.getLayers().forEach((layer, index) => {
-        if (index < backgroundLayers.length) {
-            layer.setVisible(index === currentBackgroundIndex);
-        }
-    });
+    backgroundLayers[currentBackgroundIndex].setVisible(false);
     currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+    backgroundLayers[currentBackgroundIndex].setVisible(true);
 });
+        
 
         var systemsSource = new ol.source.Vector({
             url: './layers/systems.geojson',
@@ -182,41 +181,42 @@ toggleBackgroundButton.addEventListener('click', function() {
 
 //FUNCTION SEARCH
  function handleSearch() {
-    const searchButton = document.getElementById('search-button');
     const searchInput = document.getElementById('search-input').value.trim();
     if (!searchInput) {
         alert('Please enter a system name');
         return;
     }
-    searchButton.disabled = true;
+
     const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
     if (!vectorLayer) {
         alert('No vector layer found');
-        searchButton.disabled = false;
         return;
     }
+
     const vectorSource = vectorLayer.getSource();
     const features = vectorSource.getFeatures();
     let foundFeature = null;
+
     for (let i = 0; i < features.length; i++) {
         const feature = features[i];
-        const featureName = feature.get('NAME');
-        console.log('Feature Name:', featureName);
+        const featureName = feature.get('NAME'); // Ensure this matches the property name in your GeoJSON
+        console.log('Feature Name:', featureName); // Log feature name
         if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
             foundFeature = feature;
             break;
         }
     }
+
     if (foundFeature) {
         const geometry = foundFeature.getGeometry();
         const extent = geometry.getExtent();
-        console.log('Extent:', extent);
+        console.log('Extent:', extent); // Log extent
         map.getView().fit(extent, { duration: 1000 });
-        map.getView().setMinZoom(20);
+        // Remove the minimum zoom constraint after fitting
+        map.getView().setMinZoom(0);
     } else {
         alert('System not found');
     }
-    searchButton.disabled = false;
 }
 
 document.getElementById('search-button').addEventListener('click', handleSearch);
