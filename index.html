@@ -141,13 +141,19 @@
             // Add more background layers if needed
         ];
 
+
+// BACKGROUND SWITCH FUNCTION
         var currentBackgroundIndex = 0;
 
         var toggleBackgroundButton = document.getElementById('toggle-background');
-        toggleBackgroundButton.addEventListener('click', function() {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
-        });
+toggleBackgroundButton.addEventListener('click', function() {
+    map.getLayers().forEach((layer, index) => {
+        if (index < backgroundLayers.length) {
+            layer.setVisible(index === currentBackgroundIndex);
+        }
+    });
+    currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+});
 
         var systemsSource = new ol.source.Vector({
             url: './layers/systems.geojson',
@@ -175,35 +181,42 @@
         map.addLayer(systemsLayer);
 
 //FUNCTION SEARCH
-        function handleSearch() {
-  const searchInput = document.getElementById('search-input').value;
-  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
-  if (!vectorLayer) {
-    alert('No vector layer found');
-    return;
-  }
-  const vectorSource = vectorLayer.getSource();
-  const features = vectorSource.getFeatures();
-  let foundFeature = null;
-  for (let i = 0; i < features.length; i++) {
-    const feature = features[i];
-    const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
-    console.log('Feature Name:', featureName); // Log feature name
-    if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
-      foundFeature = feature;
-      break;
+ function handleSearch() {
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input').value.trim();
+    if (!searchInput) {
+        alert('Please enter a system name');
+        return;
     }
-  }
-  if (foundFeature) {
-    const geometry = foundFeature.getGeometry();
-    const extent = geometry.getExtent();
-    console.log('Extent:', extent); // Log extent
-    map.getView().fit(extent, { duration: 1000 });
-    // Set a minimum zoom level after zooming
-    map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-  } else {
-    alert('Object not found');
-  }
+    searchButton.disabled = true;
+    const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
+    if (!vectorLayer) {
+        alert('No vector layer found');
+        searchButton.disabled = false;
+        return;
+    }
+    const vectorSource = vectorLayer.getSource();
+    const features = vectorSource.getFeatures();
+    let foundFeature = null;
+    for (let i = 0; i < features.length; i++) {
+        const feature = features[i];
+        const featureName = feature.get('NAME');
+        console.log('Feature Name:', featureName);
+        if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
+            foundFeature = feature;
+            break;
+        }
+    }
+    if (foundFeature) {
+        const geometry = foundFeature.getGeometry();
+        const extent = geometry.getExtent();
+        console.log('Extent:', extent);
+        map.getView().fit(extent, { duration: 1000 });
+        map.getView().setMinZoom(20);
+    } else {
+        alert('System not found');
+    }
+    searchButton.disabled = false;
 }
 
 document.getElementById('search-button').addEventListener('click', handleSearch);
