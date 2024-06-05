@@ -147,12 +147,25 @@
 
     var systemsSource = new ol.source.Vector({
         url: './layers/systems.geojson',
-        format: new ol.format.GeoJSON(),
-    });
+           format: new ol.format.GeoJSON(),
+        });
 
-    var systemsLayer = new ol.layer.Vector({
-        source: systemsSource
-    });
+        var transparentStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 0.5,
+                fill: new ol.style.Fill({
+                    color: 'rgba(0, 0, 0, 0)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0, 0, 0, 0)'
+                })
+            })
+        });
+
+        var systemsLayer = new ol.layer.Vector({
+            source: systemsSource,
+            style: transparentStyle
+        });
 
     map.addLayer(systemsLayer);
 
