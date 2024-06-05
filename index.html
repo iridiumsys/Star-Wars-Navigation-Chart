@@ -169,7 +169,8 @@
 
     map.addLayer(systemsLayer);
 
-function handleSearch() {
+//SEARCH FUNCTION WITH CASE INSENSIVITY.
+    function handleSearch() {
         const searchInput = document.getElementById('search-input').value.trim();
         if (!searchInput) {
             alert('Please enter a system name');
@@ -188,8 +189,10 @@ function handleSearch() {
             if (!featureName) continue; // Skip if feature doesn't have a NAME property
             const nameWords = featureName.toLowerCase().split(' ');
 
-            // Check if all search words are present in the feature name words
-            const allWordsMatch = searchWords.every(word => nameWords.includes(word));
+            // Check if any search word is a substring of any of the name words
+            const allWordsMatch = searchWords.every(searchWord =>
+                nameWords.some(nameWord => nameWord.includes(searchWord))
+            );
 
             if (allWordsMatch) {
                 foundFeature = feature;
@@ -223,6 +226,6 @@ function handleSearch() {
             document.getElementById('search-button').disabled = false;
         }
     });
-    </script>
+</script>
 </body>
 </html>
