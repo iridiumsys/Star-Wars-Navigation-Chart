@@ -105,116 +105,104 @@
         <button id="toggle-background"><i class="fas fa-star"></i></button>
     </div>
     <script>
-        var map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            })
-        });
+    var map = new ol.Map({
+        target: 'map',
+        view: new ol.View({
+            center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
+            zoom: 18,
+        })
+    });
 
-        var backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                visible: true,
-                attribution: 'Space Background'
+    var backgroundLayers = [
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: './XYZ_Space/{z}/{x}/{y}.png',
+                minZoom: 16,
+                maxZoom: 22
             }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                visible: false,
-                attribution: 'White Background'
-            })
-        ];
+            visible: true,
+            attribution: 'Space Background'
+        }),
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: './XYZ/{z}/{x}/{y}.png',
+                minZoom: 16,
+                maxZoom: 22
+            }),
+            visible: false,
+            attribution: 'White Background'
+        })
+    ];
 
-        backgroundLayers.forEach(layer => map.addLayer(layer));
+    backgroundLayers.forEach(layer => map.addLayer(layer));
 
-        var currentBackgroundIndex = 0;
+    var currentBackgroundIndex = 0;
 
-        var toggleBackgroundButton = document.getElementById('toggle-background');
-        toggleBackgroundButton.addEventListener('click', function() {
-            backgroundLayers[currentBackgroundIndex].setVisible(false);
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            backgroundLayers[currentBackgroundIndex].setVisible(true);
-        });
+    var toggleBackgroundButton = document.getElementById('toggle-background');
+    toggleBackgroundButton.addEventListener('click', function() {
+        backgroundLayers[currentBackgroundIndex].setVisible(false);
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+        backgroundLayers[currentBackgroundIndex].setVisible(true);
+    });
 
-        var systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
-        });
+    var systemsSource = new ol.source.Vector({
+        url: './layers/systems.geojson',
+        format: new ol.format.GeoJSON(),
+    });
 
-        var transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)'
-                })
-            })
-        });
+    var systemsLayer = new ol.layer.Vector({
+        source: systemsSource
+    });
 
-        var systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle
-        });
+    map.addLayer(systemsLayer);
 
-        map.addLayer(systemsLayer);
+    function handleSearch() {
+        const searchInput = document.getElementById('search-input').value.trim();
+        if (!searchInput) {
+            alert('Please enter a system name');
+            return;
+        }
 
-        systemsSource.on('featuresloadend', function() {
-            console.log('Features loaded');
-        });
+        const vectorSource = systemsLayer.getSource();
+        const features = vectorSource.getFeatures();
 
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value.trim();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
+        let foundFeature = null;
 
-            const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
-            if (!vectorLayer) {
-                alert('No vector layer found');
-                return;
-            }
-
-            const vectorSource = vectorLayer.getSource();
-            const features = vectorSource.getFeatures();
-            console.log('Total features:', features.length); // Log the number of features
-
-            let foundFeature = null;
-
-            for (let i = 0; i < features.length; i++) {
-                const feature = features[i];
-                const featureName = feature.get('NAME'); // Ensure this matches the property name in your GeoJSON
-                console.log('Feature Name:', featureName); // Log feature name
-                if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
-                    foundFeature = feature;
-                    break;
-                }
-            }
-
-            if (foundFeature) {
-                const geometry = foundFeature.getGeometry();
-                const extent = geometry.getExtent();
-                console.log('Extent:', extent); // Log extent
-                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
-                map.getView().setZoom(20); // Set the zoom level to a fixed value
-            } else {
-                alert('System not found');
-                map.getView().setZoom(18); // Reset zoom if not found
+        for (let i = 0; i < features.length; i++) {
+            const feature = features[i];
+            const featureName = feature.get('NAME');
+            if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
+                foundFeature = feature;
+                break;
             }
         }
 
-        document.getElementById('search-button').addEventListener('click', handleSearch);
-    </script>
+        if (foundFeature) {
+            const geometry = foundFeature.getGeometry();
+            const extent = geometry.getExtent();
+            console.log('Feature Name:', foundFeature.get('NAME'));
+            console.log('Extent:', extent);
+
+            if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+            } else {
+                const center = ol.extent.getCenter(extent);
+                map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+            }
+        } else {
+            alert('System not found');
+            map.getView().setZoom(18); // Reset zoom if not found
+        }
+    }
+
+    document.getElementById('search-button').addEventListener('click', handleSearch);
+
+    // Ensure the geojson is loaded before enabling search
+    systemsSource.once('change', function(e) {
+        if (systemsSource.getState() === 'ready') {
+            document.getElementById('search-button').disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
