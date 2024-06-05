@@ -170,6 +170,7 @@
     map.addLayer(systemsLayer);
 
 //SEARCH FUNCTION WITH CASE INSENSIVITY.
+<script>
     function handleSearch() {
         const searchInput = document.getElementById('search-input').value.trim();
         if (!searchInput) {
@@ -186,12 +187,18 @@
         for (let i = 0; i < features.length; i++) {
             const feature = features[i];
             const featureName = feature.get('NAME');
-            if (!featureName) continue; // Skip if feature doesn't have a NAME property
-            const nameWords = featureName.toLowerCase().split(' ');
+            const altName = feature.get('ALT_NAME');
+            if (!featureName && !altName) continue; // Skip if feature doesn't have both NAME and ALT_NAME properties
 
-            // Check if any search word is a substring of any of the name words
+            const nameWords = featureName ? featureName.toLowerCase().split(' ') : [];
+            const altNameWords = altName ? altName.toLowerCase().split(' ') : [];
+
+            // Combine nameWords and altNameWords for the search
+            const combinedWords = nameWords.concat(altNameWords);
+
+            // Check if any search word is a substring of any of the combined words
             const allWordsMatch = searchWords.every(searchWord =>
-                nameWords.some(nameWord => nameWord.includes(searchWord))
+                combinedWords.some(word => word.includes(searchWord))
             );
 
             if (allWordsMatch) {
@@ -204,6 +211,7 @@
             const geometry = foundFeature.getGeometry();
             const extent = geometry.getExtent();
             console.log('Feature Name:', foundFeature.get('NAME'));
+            console.log('Alt Name:', foundFeature.get('ALT_NAME'));
             console.log('Extent:', extent);
 
             if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
