@@ -169,13 +169,14 @@
 
     map.addLayer(systemsLayer);
 
-    function handleSearch() {
+function handleSearch() {
         const searchInput = document.getElementById('search-input').value.trim();
         if (!searchInput) {
             alert('Please enter a system name');
             return;
         }
 
+        const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
         const vectorSource = systemsLayer.getSource();
         const features = vectorSource.getFeatures();
 
@@ -184,7 +185,13 @@
         for (let i = 0; i < features.length; i++) {
             const feature = features[i];
             const featureName = feature.get('NAME');
-            if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
+            if (!featureName) continue; // Skip if feature doesn't have a NAME property
+            const nameWords = featureName.toLowerCase().split(' ');
+
+            // Check if all search words are present in the feature name words
+            const allWordsMatch = searchWords.every(word => nameWords.includes(word));
+
+            if (allWordsMatch) {
                 foundFeature = feature;
                 break;
             }
@@ -216,6 +223,6 @@
             document.getElementById('search-button').disabled = false;
         }
     });
-</script>
+    </script>
 </body>
 </html>
