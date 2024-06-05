@@ -9,10 +9,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
 
+    <!-- ol-ext -->
+    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
+    <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
-    <!-- Style -->
+    <!-- Custom scripts -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
@@ -26,7 +31,7 @@
             height: 100%;
         }
 
-        .search-container {
+        .search-container, .routing-container {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -37,9 +42,10 @@
             display: flex;
             align-items: center;
             z-index: 1000; /* Ensure it is above the map */
+            margin-top: 50px;
         }
 
-        .search-container input {
+        .search-container input, .routing-container button {
             padding: 5px;
             border: none;
             border-radius: 3px;
@@ -51,7 +57,7 @@
             outline: none;
         }
 
-        .search-container button#search-button {
+        .search-container button#search-button, .routing-container button#routing-button {
             padding: 5px 10px;
             border: none;
             border-radius: 3px;
@@ -63,7 +69,7 @@
             transition: background 0.3s;
         }
 
-        .search-container button#search-button:hover {
+        .search-container button#search-button:hover, .routing-container button#routing-button:hover {
             background: #79aaca;
         }
 
@@ -104,50 +110,49 @@
     <div class="toggle-background-container">
         <button id="toggle-background"><i class="fas fa-star"></i></button>
     </div>
+    <div class="routing-container">
+        <button id="routing-button">Start Routing</button>
+    </div>
+
     <script>
-    var map = new ol.Map({
-        target: 'map',
-        view: new ol.View({
-            center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-            zoom: 18,
-        })
-    });
+        var map = new ol.Map({
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
+                zoom: 18,
+            })
+        });
 
-    var backgroundLayers = [
-        new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: './XYZ_Space/{z}/{x}/{y}.png',
-                minZoom: 16,
-                maxZoom: 22
+        var backgroundLayers = [
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: './XYZ_Space/{z}/{x}/{y}.png',
+                    minZoom: 16,
+                    maxZoom: 22
+                }),
+                attribution: 'Space Background',
             }),
-            visible: true,
-            attribution: 'Space Background'
-        }),
-        new ol.layer.Tile({
-            source: new ol.source.XYZ({
-                url: './XYZ/{z}/{x}/{y}.png',
-                minZoom: 16,
-                maxZoom: 22
-            }),
-            visible: false,
-            attribution: 'White Background'
-        })
-    ];
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: './XYZ/{z}/{x}/{y}.png',
+                    minZoom: 16,
+                    maxZoom: 22
+                }),
+                attribution: 'White Background',
+            })
+        ];
 
-    backgroundLayers.forEach(layer => map.addLayer(layer));
+        var currentBackgroundIndex = 0;
 
-    var currentBackgroundIndex = 0;
+        var toggleBackgroundButton = document.getElementById('toggle-background');
+        toggleBackgroundButton.addEventListener('click', function() {
+            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+            map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
+        });
 
-    var toggleBackgroundButton = document.getElementById('toggle-background');
-    toggleBackgroundButton.addEventListener('click', function() {
-        backgroundLayers[currentBackgroundIndex].setVisible(false);
-        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-        backgroundLayers[currentBackgroundIndex].setVisible(true);
-    });
-
-    var systemsSource = new ol.source.Vector({
-        url: './layers/systems.geojson',
-           format: new ol.format.GeoJSON(),
+        var systemsSource = new ol.source.Vector({
+            url: './layers/systems.geojson',
+            format: new ol.format.GeoJSON(),
         });
 
         var transparentStyle = new ol.style.Style({
@@ -167,72 +172,265 @@
             style: transparentStyle
         });
 
-    map.addLayer(systemsLayer);
+        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+        map.addLayer(systemsLayer);
 
-//SEARCH FUNCTION WITH CASE INSENSIVITY.
-    function handleSearch() {
-        const searchInput = document.getElementById('search-input').value.trim();
-        if (!searchInput) {
-            alert('Please enter a system name');
-            return;
-        }
+        // Routing Functionality
+        var routeLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                url: './layers/routes.geojson',
+                format: new ol.format.GeoJSON()
+            }),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'green',
+                    width: 2
+                })
+            })
+        });
 
-        const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
-        const vectorSource = systemsLayer.getSource();
-        const features = vectorSource.getFeatures();
+        var routingSource = routeLayer.getSource();
 
-        let foundFeature = null;
+        var routeFeatureOverlay = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'gold',
+                    width: 5
+                }),
+                text: new ol.style.Text({
+                    font: '15px Calibri,sans-serif',
+                    fill: new ol.style.Fill({
+                        color: '#000'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#fff',
+                        width: 3
+                    })
+                })
+            })
+        });
 
-        for (let i = 0; i < features.length; i++) {
-            const feature = features[i];
-            const featureName = feature.get('NAME');
-            const altName = feature.get('ALT_NAME');
-            if (!featureName && !altName) continue; // Skip if feature doesn't have both NAME and ALT_NAME properties
+        map.addLayer(routeFeatureOverlay);
 
-            const nameWords = featureName ? featureName.toLowerCase().split(' ') : [];
-            const altNameWords = altName ? altName.toLowerCase().split(' ') : [];
+        var startPoint = null;
+        var endPoint = null;
 
-            // Combine nameWords and altNameWords for the search
-            const combinedWords = nameWords.concat(altNameWords);
+        var routingButton = document.getElementById('routing-button');
+        routingButton.addEventListener('click', function() {
+            alert('Click on the map to select the start and end points.');
 
-            // Check if any search word is a substring of any of the combined words
-            const allWordsMatch = searchWords.every(searchWord =>
-                combinedWords.some(word => word.includes(searchWord))
-            );
+            map.once('click', function(evt) {
+                startPoint = evt.coordinate;
+                alert('Start point selected. Now click on the map to select the end point.');
 
-            if (allWordsMatch) {
-                foundFeature = feature;
-                break;
+                map.once('click', function(evt) {
+                    endPoint = evt.coordinate;
+                    alert('End point selected. Calculating route...');
+                    calculateRoute();
+                });
+            });
+        });
+
+        function calculateRoute() {
+            if (!startPoint || !endPoint) {
+                alert('Please select both start and end points.');
+                return;
             }
-        }
 
-        if (foundFeature) {
-            const geometry = foundFeature.getGeometry();
-            const extent = geometry.getExtent();
-            console.log('Feature Name:', foundFeature.get('NAME'));
-            console.log('Alt Name:', foundFeature.get('ALT_NAME'));
-            console.log('Extent:', extent);
+            // Find the shortest path using Dijkstra's algorithm
+            var graph = buildGraphFromGeoJSON(routingSource);
+            var start = findClosestNode(startPoint, graph);
+            var end = findClosestNode(endPoint, graph);
 
-            if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+            var route = dijkstra(graph, start, end);
+            if (route.length > 0) {
+                var routeCoords = route.map(node => graph[node].coordinate);
+                var routeFeature = new ol.Feature({
+                    geometry: new ol.geom.LineString(routeCoords)
+                });
+
+                routeFeatureOverlay.getSource().clear();
+                routeFeatureOverlay.getSource().addFeature(routeFeature);
+
+                // Find and list systems crossed
+                var crossedSystems = findCrossedSystems(routeCoords);
+                if (crossedSystems.length > 0) {
+                    alert('Systems crossed: ' + crossedSystems.join(', '));
+                } else {
+                    alert('No systems crossed.');
+                }
             } else {
-                const center = ol.extent.getCenter(extent);
-                map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                alert('No route found.');
             }
-        } else {
-            alert('System not found');
-            map.getView().setZoom(18); // Reset zoom if not found
         }
-    }
 
-    document.getElementById('search-button').addEventListener('click', handleSearch);
+        function buildGraphFromGeoJSON(source) {
+            var features = source.getFeatures();
+            var graph = {};
 
-    // Ensure the geojson is loaded before enabling search
-    systemsSource.once('change', function(e) {
-        if (systemsSource.getState() === 'ready') {
-            document.getElementById('search-button').disabled = false;
+            features.forEach(function(feature) {
+                var geom = feature.getGeometry();
+                if (geom.getType() === 'LineString') {
+                    var coords = geom.getCoordinates();
+                    for (var i = 0; i < coords.length - 1; i++) {
+                        var start = coords[i];
+                        var end = coords[i + 1];
+                        var startKey = start.toString();
+                        var endKey = end.toString();
+
+                        if (!graph[startKey]) graph[startKey] = { coordinate: start, edges: {} };
+                        if (!graph[endKey]) graph[endKey] = { coordinate: end, edges: {} };
+
+                        var distance = ol.sphere.getDistance(start, end);
+                        graph[startKey].edges[endKey] = distance;
+                        graph[endKey].edges[startKey] = distance;
+                    }
+                }
+            });
+
+            return graph;
         }
-    });
-</script>
+
+        function findClosestNode(coordinate, graph) {
+            var closestNode = null;
+            var closestDistance = Infinity;
+
+            for (var node in graph) {
+                var distance = ol.sphere.getDistance(coordinate, graph[node].coordinate);
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            }
+
+            return closestNode;
+        }
+
+        function dijkstra(graph, start, end) {
+            var distances = {};
+            var prevNodes = {};
+            var unvisited = new Set();
+
+            for (var node in graph) {
+                distances[node] = Infinity;
+                unvisited.add(node);
+            }
+            distances[start] = 0;
+
+            while (unvisited.size > 0) {
+                var closestNode = null;
+                var closestDistance = Infinity;
+
+                unvisited.forEach(function(node) {
+                    if (distances[node] < closestDistance) {
+                        closestDistance = distances[node];
+                        closestNode = node;
+                    }
+                });
+
+                if (closestNode === end) {
+                    var path = [];
+                    var currentNode = end;
+                    while (currentNode) {
+                        path.unshift(currentNode);
+                        currentNode = prevNodes[currentNode];
+                    }
+                    return path;
+                }
+
+                unvisited.delete(closestNode);
+
+                for (var neighbor in graph[closestNode].edges) {
+                    var newDistance = distances[closestNode] + graph[closestNode].edges[neighbor];
+                    if (newDistance < distances[neighbor]) {
+                        distances[neighbor] = newDistance;
+                        prevNodes[neighbor] = closestNode;
+                    }
+                }
+            }
+
+            return [];
+        }
+
+        function findCrossedSystems(routeCoords) {
+            var crossedSystems = [];
+            var features = systemsLayer.getSource().getFeatures();
+
+            features.forEach(function(feature) {
+                var geom = feature.getGeometry();
+                if (geom.intersectsExtent(new ol.geom.LineString(routeCoords).getExtent())) {
+                    crossedSystems.push(feature.get('NAME'));
+                }
+            });
+
+            return crossedSystems;
+        }
+
+        // Search Functionality
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input').value.trim();
+            if (!searchInput) {
+                alert('Please enter a system name');
+                return;
+            }
+
+            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
+            const vectorSource = systemsLayer.getSource();
+            const features = vectorSource.getFeatures();
+
+            let foundFeature = null;
+
+            for (let i = 0; i < features.length; i++) {
+                const feature = features[i];
+                const featureName = feature.get('NAME');
+                const altName = feature.get('ALT_NAME');
+                if (!featureName && !altName) continue; // Skip if feature doesn't have both NAME and ALT_NAME properties
+
+                const nameWords = featureName ? featureName.toLowerCase().split(' ') : [];
+                const altNameWords = altName ? altName.toLowerCase().split(' ') : [];
+
+                // Combine nameWords and altNameWords for the search
+                const combinedWords = nameWords.concat(altNameWords);
+
+                // Check if any search word is a substring of any of the combined words
+                const allWordsMatch = searchWords.every(searchWord =>
+                    combinedWords.some(word => word.includes(searchWord))
+                );
+
+                if (allWordsMatch) {
+                    foundFeature = feature;
+                    break;
+                }
+            }
+
+            if (foundFeature) {
+                const geometry = foundFeature.getGeometry();
+                const extent = geometry.getExtent();
+                console.log('Feature Name:', foundFeature.get('NAME'));
+                console.log('Alt Name:', foundFeature.get('ALT_NAME'));
+                console.log('Extent:', extent);
+
+                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+                } else {
+                    const center = ol.extent.getCenter(extent);
+                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                }
+            } else {
+                alert('System not found');
+                map.getView().setZoom(18); // Reset zoom if not found
+            }
+        }
+
+        document.getElementById('search-button').addEventListener('click', handleSearch);
+
+        // Ensure the geojson is loaded before enabling search
+        systemsSource.once('change', function(e) {
+            if (systemsSource.getState() === 'ready') {
+                document.getElementById('search-button').disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
