@@ -9,16 +9,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
 
-    <!-- ol-ext -->
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
-    <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
-
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-
-    <!-- Custom scripts 
-    <script type="module" src="./tools/search.js"></script> -->
 
     <!-- Style -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -113,45 +105,49 @@
         <button id="toggle-background"><i class="fas fa-star"></i></button>
     </div>
     <script>
-        var map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            })
-        });
+    var map = new ol.Map({
+        target: 'map',
+        view: new ol.View({
+            center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
+            zoom: 18,
+        })
+    });
 
-        var backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'Space Background',
+    var backgroundLayers = [
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: './XYZ_Space/{z}/{x}/{y}.png',
+                minZoom: 16,
+                maxZoom: 22
             }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'White Background',
-            })
-            // Add more background layers if needed
-        ];
+            visible: true,
+            attribution: 'Space Background'
+        }),
+        new ol.layer.Tile({
+            source: new ol.source.XYZ({
+                url: './XYZ/{z}/{x}/{y}.png',
+                minZoom: 16,
+                maxZoom: 22
+            }),
+            visible: false,
+            attribution: 'White Background'
+        })
+    ];
 
-        var currentBackgroundIndex = 0;
+    backgroundLayers.forEach(layer => map.addLayer(layer));
 
-        var toggleBackgroundButton = document.getElementById('toggle-background');
-        toggleBackgroundButton.addEventListener('click', function() {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
-        });
+    var currentBackgroundIndex = 0;
 
-        var systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
+    var toggleBackgroundButton = document.getElementById('toggle-background');
+    toggleBackgroundButton.addEventListener('click', function() {
+        backgroundLayers[currentBackgroundIndex].setVisible(false);
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
+        backgroundLayers[currentBackgroundIndex].setVisible(true);
+    });
+
+    var systemsSource = new ol.source.Vector({
+        url: './layers/systems.geojson',
+           format: new ol.format.GeoJSON(),
         });
 
         var transparentStyle = new ol.style.Style({
@@ -171,43 +167,65 @@
             style: transparentStyle
         });
 
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
-        map.addLayer(systemsLayer);
+    map.addLayer(systemsLayer);
 
-//FUNCTION SEARCH
-        function handleSearch() {
-  const searchInput = document.getElementById('search-input').value;
-  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === systemsSource);
-  if (!vectorLayer) {
-    alert('No vector layer found');
-    return;
-  }
-  const vectorSource = vectorLayer.getSource();
-  const features = vectorSource.getFeatures();
-  let foundFeature = null;
-  for (let i = 0; i < features.length; i++) {
-    const feature = features[i];
-    const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
-    console.log('Feature Name:', featureName); // Log feature name
-    if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
-      foundFeature = feature;
-      break;
+//SEARCH FUNCTION WITH CASE INSENSIVITY.
+    function handleSearch() {
+        const searchInput = document.getElementById('search-input').value.trim();
+        if (!searchInput) {
+            alert('Please enter a system name');
+            return;
+        }
+
+        const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
+        const vectorSource = systemsLayer.getSource();
+        const features = vectorSource.getFeatures();
+
+        let foundFeature = null;
+
+        for (let i = 0; i < features.length; i++) {
+            const feature = features[i];
+            const featureName = feature.get('NAME');
+            if (!featureName) continue; // Skip if feature doesn't have a NAME property
+            const nameWords = featureName.toLowerCase().split(' ');
+
+            // Check if any search word is a substring of any of the name words
+            const allWordsMatch = searchWords.every(searchWord =>
+                nameWords.some(nameWord => nameWord.includes(searchWord))
+            );
+
+            if (allWordsMatch) {
+                foundFeature = feature;
+                break;
+            }
+        }
+
+        if (foundFeature) {
+            const geometry = foundFeature.getGeometry();
+            const extent = geometry.getExtent();
+            console.log('Feature Name:', foundFeature.get('NAME'));
+            console.log('Extent:', extent);
+
+            if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+            } else {
+                const center = ol.extent.getCenter(extent);
+                map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+            }
+        } else {
+            alert('System not found');
+            map.getView().setZoom(18); // Reset zoom if not found
+        }
     }
-  }
-  if (foundFeature) {
-    const geometry = foundFeature.getGeometry();
-    const extent = geometry.getExtent();
-    console.log('Extent:', extent); // Log extent
-    map.getView().fit(extent, { duration: 1000 });
-    // Set a minimum zoom level after zooming
-    map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-  } else {
-    alert('Object not found');
-  }
-}
 
-document.getElementById('search-button').addEventListener('click', handleSearch);
-        
-    </script>
+    document.getElementById('search-button').addEventListener('click', handleSearch);
+
+    // Ensure the geojson is loaded before enabling search
+    systemsSource.once('change', function(e) {
+        if (systemsSource.getState() === 'ready') {
+            document.getElementById('search-button').disabled = false;
+        }
+    });
+</script>
 </body>
 </html>
