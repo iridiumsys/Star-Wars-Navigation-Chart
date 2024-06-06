@@ -21,9 +21,8 @@
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-    <style rel="stylesheet" href="./style.css" type="text/css">
-
-    </head>
+    <link rel="stylesheet" href="./style.css" type="text/css">
+</head>
 <body>
     <div id="map"></div>
     <div class="search-container">
@@ -75,62 +74,55 @@
         });
 
         // Search functionality
-     function handleSearch() {
-        const searchInput = document.getElementById('search-input').value.trim();
-        if (!searchInput) {
-            alert('Please enter a system name');
-            return;
-        }
-
-        const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
-        const vectorSource = systemsLayer.getSource();
-        const features = vectorSource.getFeatures();
-
-        let foundFeature = null;
-
-        for (let i = 0; i < features.length; i++) {
-            const feature = features[i];
-            const featureName = feature.get('NAME');
-            if (!featureName) continue; // Skip if feature doesn't have a NAME property
-            const nameWords = featureName.toLowerCase().split(' ');
-
-            // Check if any search word is a substring of any of the name words
-            const allWordsMatch = searchWords.every(searchWord =>
-                nameWords.some(nameWord => nameWord.includes(searchWord))
-            );
-
-            if (allWordsMatch) {
-                foundFeature = feature;
-                break;
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input').value.trim();
+            if (!searchInput) {
+                alert('Please enter a system name');
+                return;
             }
-        }
 
-        if (foundFeature) {
-            const geometry = foundFeature.getGeometry();
-            const extent = geometry.getExtent();
-            console.log('Feature Name:', foundFeature.get('NAME'));
-            console.log('Extent:', extent);
+            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
+            const vectorSource = systemsLayer.getSource();
+            const features = vectorSource.getFeatures();
 
-            if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+            let foundFeature = null;
+
+            for (let i = 0; i < features.length; i++) {
+                const feature = features[i];
+                const featureName = feature.get('NAME');
+                if (!featureName) continue; // Skip if feature doesn't have a NAME property
+                const nameWords = featureName.toLowerCase().split(' ');
+
+                // Check if any search word is a substring of any of the name words
+                const allWordsMatch = searchWords.every(searchWord =>
+                    nameWords.some(nameWord => nameWord.includes(searchWord))
+                );
+
+                if (allWordsMatch) {
+                    foundFeature = feature;
+                    break;
+                }
+            }
+
+            if (foundFeature) {
+                const geometry = foundFeature.getGeometry();
+                const extent = geometry.getExtent();
+                console.log('Feature Name:', foundFeature.get('NAME'));
+                console.log('Extent:', extent);
+
+                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+                } else {
+                    const center = ol.extent.getCenter(extent);
+                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                }
             } else {
-                const center = ol.extent.getCenter(extent);
-                map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                alert('System not found');
+                map.getView().setZoom(18); // Reset zoom if not found
             }
-        } else {
-            alert('System not found');
-            map.getView().setZoom(18); // Reset zoom if not found
         }
-    }
 
-    document.getElementById('search-button').addEventListener('click', handleSearch);
-
-    // Ensure the geojson is loaded before enabling search
-    systemsSource.once('change', function(e) {
-        if (systemsSource.getState() === 'ready') {
-            document.getElementById('search-button').disabled = false;
-        }
-    });
+        document.getElementById('search-button').addEventListener('click', handleSearch);
 
         var systemsSource = new ol.source.Vector({
             url: './layers/systems.geojson',
