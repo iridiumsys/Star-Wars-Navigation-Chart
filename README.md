@@ -1,4 +1,4 @@
-# Star-Wars-Navigation-Chart V1.3
+# Star-Wars-Navigation-Chart V1.4
 This project is a synthesis of the Star Wars (tm) canon sources, collected from
 - Wookiepedia - https://starwars.fandom.com/wiki/Main_Page ;
 - Official Star Wars books and maps (Timelines original map for the basic datas) ;
