@@ -14,11 +14,6 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
     <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
 
-    <!-- Graphlib and Graphlib-Dijkstra -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.9/graphlib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dot/0.1.7/graphlib-dot.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dijkstra/2.1.9/graphlib-dijkstra.min.js"></script>
-
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -194,62 +189,92 @@
                     map.once('click', function(event) {
                         endPoint = event.coordinate;
                         console.log('End node:', endPoint);
-                        calculateAndDisplayRoute();
-                    });
+calculateAndDisplayRoute();
                 });
-            } else {
-                routeFeatureOverlay.getSource().clear();
+            });
+        }
+    });
+
+    function calculateAndDisplayRoute() {
+        if (!startPoint || !endPoint) {
+            alert('Please select both start and end points.');
+            return;
+        }
+
+        var startProj = ol.proj.toLonLat(startPoint);
+        var endProj = ol.proj.toLonLat(endPoint);
+
+        var graph = new Map();
+
+        routeLayer.getSource().forEachFeature(function(feature) {
+            var geometry = feature.getGeometry();
+            var coordinates = geometry.getCoordinates();
+
+            for (var i = 0; i < coordinates.length - 1; i++) {
+                var start = ol.proj.toLonLat(coordinates[i]);
+                var end = ol.proj.toLonLat(coordinates[i + 1]);
+                var distance = ol.sphere.getDistance(start, end);
+
+                if (!graph.has(start)) graph.set(start, new Map());
+                if (!graph.has(end)) graph.set(end, new Map());
+
+                graph.get(start).set(end, distance);
+                graph.get(end).set(start, distance);
             }
         });
 
-        function calculateAndDisplayRoute() {
-            if (!startPoint || !endPoint) {
-                alert('Please select both start and end points.');
-                return;
+        var path = dijkstra(graph, JSON.stringify(startProj), JSON.stringify(endProj));
+        if (!path) {
+            alert('No route found between the selected points.');
+            return;
+        }
+
+        var routeCoordinates = path.map(JSON.parse).map(ol.proj.fromLonLat);
+
+        var routeFeature = new ol.Feature({
+            geometry: new ol.geom.LineString(routeCoordinates)
+        });
+
+        routeFeatureOverlay.getSource().clear();
+        routeFeatureOverlay.getSource().addFeature(routeFeature);
+    }
+
+    function dijkstra(graph, start, end) {
+        var distances = new Map();
+        var predecessors = new Map();
+        var queue = new Set(graph.keys());
+
+        distances.set(start, 0);
+        queue.forEach(function(node) {
+            if (node !== start) distances.set(node, Infinity);
+        });
+
+        while (queue.size > 0) {
+            var minNode = [...queue].reduce((min, node) => distances.get(node) < distances.get(min) ? node : min);
+            queue.delete(minNode);
+
+            if (minNode === end) {
+                var path = [];
+                while (predecessors.get(minNode)) {
+                    path.push(minNode);
+                    minNode = predecessors.get(minNode);
+                }
+                path.push(start);
+                return path.reverse();
             }
 
-            var startProj = ol.proj.toLonLat(startPoint);
-            var endProj = ol.proj.toLonLat(endPoint);
-
-            var graph = new graphlib.Graph();
-
-            routeLayer.getSource().forEachFeature(function(feature) {
-                var geometry = feature.getGeometry();
-                var coordinates = geometry.getCoordinates();
-
-                for (var i = 0; i < coordinates.length - 1; i++) {
-                    var start = ol.proj.toLonLat(coordinates[i]);
-                    var end = ol.proj.toLonLat(coordinates[i + 1]);
-                    var distance = ol.sphere.getDistance(start, end);
-
-                    graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
-                    graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
+            graph.get(minNode).forEach(function(distance, neighbor) {
+                var alt = distances.get(minNode) + distance;
+                if (alt < distances.get(neighbor)) {
+                    distances.set(neighbor, alt);
+                    predecessors.set(neighbor, minNode);
                 }
             });
-
-            var path = graphlib.alg.dijkstra(graph, JSON.stringify(startProj), function(v) {
-                return graph.nodeEdges(v).reduce((acc, e) => {
-                    acc[e.v === v ? e.w : e.v] = graph.edge(e);
-                    return acc;
-                }, {});
-            });
-
-            var route = [];
-            var node = JSON.stringify(endProj);
-            while (node !== JSON.stringify(startProj)) {
-                route.push(JSON.parse(node));
-                node = path[node].predecessor;
-            }
-            route.push(startProj);
-            route.reverse();
-
-            var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(route.map(ol.proj.fromLonLat))
-            });
-
-            routeFeatureOverlay.getSource().clear();
-            routeFeatureOverlay.getSource().addFeature(routeFeature);
         }
-    </script>
+
+        return null;
+    }
+</script>
 </body>
 </html>
+
