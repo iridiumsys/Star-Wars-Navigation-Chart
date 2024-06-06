@@ -146,6 +146,10 @@
         <button id="toggle-routing"><i class="fas fa-route"></i></button>
     </div>
 
+    <!-- Dijkstra's Algorithm -->
+    <script src="https://cdn.jsdelivr.net/npm/graphlib@2.1.9/dist/graphlib.core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphlib-dijkstra@2.0.1/graphlib-dijkstra.js"></script>
+
     <script>
         var map = new ol.Map({
             target: 'map',
@@ -176,10 +180,14 @@
 
         var currentBackgroundIndex = 0;
 
+        // Adding the initial background layer
+        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+
         var toggleBackgroundButton = document.getElementById('toggle-background');
         toggleBackgroundButton.addEventListener('click', function() {
+            map.getLayers().removeAt(0);
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().item(0).setSource(backgroundLayers[currentBackgroundIndex].getSource());
+            map.getLayers().insertAt(0, backgroundLayers[currentBackgroundIndex]);
         });
 
         var systemsSource = new ol.source.Vector({
@@ -204,7 +212,6 @@
             style: transparentStyle
         });
 
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
         map.addLayer(systemsLayer);
 
         // Routing Functionality
@@ -270,186 +277,47 @@
                 return;
             }
 
-            // Find the shortest path using Dijkstra's algorithm
-            var graph = buildGraphFromGeoJSON(routingSource);
-            var start = findClosestNode(startPoint, graph);
-            var end = findClosestNode(endPoint, graph);
+            // Convert coordinates to projections
+            var startProj = ol.proj.toLonLat(startPoint);
+            var endProj = ol.proj.toLonLat(endPoint);
 
-            console.log('Start node:', start);
-            console.log('End node:', end);
+            // Build the graph from the geojson data
+            var graph = new graphlib.Graph();
 
-            var route = dijkstra(graph, start, end);
-            if (route.length > 0) {
-                var routeCoords = route.map(node => graph[node].coordinate);
-                var routeFeature = new ol.Feature({
-                    geometry: new ol.geom.LineString(routeCoords)
-                });
+            routingSource.forEachFeature(function(feature) {
+                var geometry = feature.getGeometry();
+                var coordinates = geometry.getCoordinates();
 
-                routeFeatureOverlay.getSource().clear();
-                routeFeatureOverlay.getSource().addFeature(routeFeature);
+                for (var i = 0; i < coordinates.length - 1; i++) {
+                    var start = ol.proj.toLonLat(coordinates[i]);
+                    var end = ol.proj.toLonLat(coordinates[i + 1]);
+                    var distance = ol.sphere.getDistance(start, end);
 
-                // Find and list systems crossed
-                var crossedSystems = findCrossedSystems(routeCoords);
-                if (crossedSystems.length > 0) {
-                    alert('Systems crossed: ' + crossedSystems.join(', '));
-                }
-            } else {
-                alert('No route found.');
-            }
-        }
-
-        function buildGraphFromGeoJSON(source) {
-            var features = source.getFeatures();
-            var graph = {};
-
-            features.forEach(function(feature) {
-                var coordinates = feature.getGeometry().getCoordinates();
-                var startCoord = coordinates[0];
-                var endCoord = coordinates[coordinates.length - 1];
-                var startKey = startCoord.join(',');
-                var endKey = endCoord.join(',');
-
-                if (!graph[startKey]) {
-                    graph[startKey] = { neighbors: {}, coordinate: startCoord };
-                }
-                if (!graph[endKey]) {
-                    graph[endKey] = { neighbors: {}, coordinate: endCoord };
-                }
-
-                graph[startKey].neighbors[endKey] = ol.sphere.getLength(new ol.geom.LineString(coordinates));
-                graph[endKey].neighbors[startKey] = ol.sphere.getLength(new ol.geom.LineString(coordinates));
-            });
-
-            return graph;
-        }
-
-        function findClosestNode(coordinate, graph) {
-            var closestNode = null;
-            var minDistance = Infinity;
-
-            for (var node in graph) {
-                var nodeCoord = graph[node].coordinate;
-                var distance = ol.sphere.getDistance(coordinate, nodeCoord);
-
-                if (distance < minDistance) {
-                    closestNode = node;
-                    minDistance = distance;
-                }
-            }
-
-            return closestNode;
-        }
-
-        function dijkstra(graph, start, end) {
-            var distances = {};
-            var prev = {};
-            var pq = new PriorityQueue();
-
-            for (var node in graph) {
-                if (node === start) {
-                    distances[node] = 0;
-                    pq.enqueue(node, 0);
-                } else {
-                    distances[node] = Infinity;
-                    pq.enqueue(node, Infinity);
-                }
-                prev[node] = null;
-            }
-
-            while (!pq.isEmpty()) {
-                var currentNode = pq.dequeue().element;
-
-                if (currentNode === end) {
-                    var path = [];
-                    var temp = currentNode;
-
-                    while (prev[temp]) {
-                        path.push(temp);
-                        temp = prev[temp];
-                    }
-
-                    return path.reverse();
-                }
-
-                if (currentNode || distances[currentNode] !== Infinity) {
-                    for (var neighbor in graph[currentNode].neighbors) {
-                        var alt = distances[currentNode] + graph[currentNode].neighbors[neighbor];
-
-                        if (alt < distances[neighbor]) {
-                            distances[neighbor] = alt;
-                            prev[neighbor] = currentNode;
-                            pq.enqueue(neighbor, distances[neighbor]);
-                        }
-                    }
-                }
-            }
-
-            return [];
-        }
-
-        function findCrossedSystems(routeCoords) {
-            var crossedSystems = [];
-
-            routeCoords.forEach(function(coord) {
-                systemsSource.forEachFeature(function(feature) {
-                    var geometry = feature.getGeometry();
-                    if (geometry.intersectsCoordinate(coord)) {
-                        crossedSystems.push(feature.get('NAME') || feature.get('ALT_NAME'));
-                    }
-                });
-            });
-
-            return crossedSystems;
-        }
-
-        class PriorityQueue {
-            constructor() {
-                this.items = [];
-            }
-
-            enqueue(element, priority) {
-                var queueElement = { element: element, priority: priority };
-                var added = false;
-
-                for (var i = 0; i < this.items.length; i++) {
-                    if (queueElement.priority < this.items[i].priority) {
-                        this.items.splice(i, 1, queueElement);
-                        added = true;
-                        break;
-                    }
-                }
-
-                if (!added) {
-                    this.items.push(queueElement);
-                }
-            }
-
-            dequeue() {
-                if (this.isEmpty()) {
-                    return "Underflow";
-                }
-                return this.items.shift();
-            }
-
-            isEmpty() {
-                return this.items.length === 0;
-            }
-        }
-
-        document.getElementById('search-button').addEventListener('click', function() {
-            var searchInput = document.getElementById('search-input').value;
-            var features = systemsSource.getFeatures();
-
-            features.forEach(function(feature) {
-                var name = feature.get('NAME').toLowerCase();
-                var altName = feature.get('ALT_NAME') ? feature.get('ALT_NAME').toLowerCase() : '';
-
-                if (name.includes(searchInput.toLowerCase()) || altName.includes(searchInput.toLowerCase())) {
-                    var coord = feature.getGeometry().getCoordinates();
-                    map.getView().animate({ center: coord, zoom: 18 });
+                    graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
+                    graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
                 }
             });
-        });
+
+            // Perform Dijkstra's algorithm
+            var dijkstra = graphlib.alg.dijkstra(graph, JSON.stringify(startProj));
+            var path = [];
+
+            var currNode = JSON.stringify(endProj);
+            while (currNode !== JSON.stringify(startProj)) {
+                path.push(JSON.parse(currNode));
+                currNode = dijkstra[currNode].predecessor;
+            }
+            path.push(startProj);
+            path.reverse();
+
+            // Display the route on the map
+            var routeFeature = new ol.Feature({
+                geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat))
+            });
+
+            routeFeatureOverlay.getSource().clear();
+            routeFeatureOverlay.getSource().addFeature(routeFeature);
+        }
     </script>
 </body>
 </html>
