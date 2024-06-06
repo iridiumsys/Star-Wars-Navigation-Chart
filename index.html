@@ -17,6 +17,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 
+    <!-- Dijkstra's Algorithm -->
+    <script src="https://cdn.jsdelivr.net/npm/graphlib@2.1.9/dist/graphlib.core.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphlib-dijkstra@2.0.1/graphlib-dijkstra.js"></script>
+
     <!-- Custom scripts -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
@@ -41,7 +45,7 @@
             box-shadow: 0 0 10px rgba(122, 181, 217, 0.5);
             display: flex;
             align-items: center;
-            z-index: 1000; /* Ensure it is above the map */
+            z-index: 1000;
         }
 
         .search-container input {
@@ -74,6 +78,17 @@
 
         .ol-zoom {
             bottom: 100px !important;
+        }
+
+        .ol-zoom button {
+            background: rgba(0, 0, 0, 0.8) !important;
+            color: white !important;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .ol-zoom button:hover {
+            background: #9cd0f3 !important;
         }
 
         .toggle-background-container, .toggle-routing-container {
@@ -146,10 +161,6 @@
         <button id="toggle-routing"><i class="fas fa-route"></i></button>
     </div>
 
-    <!-- Dijkstra's Algorithm -->
-    <script src="https://cdn.jsdelivr.net/npm/graphlib@2.1.9/dist/graphlib.core.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/graphlib-dijkstra@2.0.1/graphlib-dijkstra.js"></script>
-
     <script>
         var map = new ol.Map({
             target: 'map',
@@ -185,9 +196,8 @@
 
         var toggleBackgroundButton = document.getElementById('toggle-background');
         toggleBackgroundButton.addEventListener('click', function() {
-            map.getLayers().removeAt(0);
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().insertAt(0, backgroundLayers[currentBackgroundIndex]);
+            map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
         });
 
         var systemsSource = new ol.source.Vector({
@@ -259,19 +269,19 @@
         toggleRoutingButton.addEventListener('click', function() {
             alert('Click on the map to select the start and end points.');
 
-            map.once('click', function(evt) {
-                startPoint = evt.coordinate;
-                alert('Start point selected. Now click on the map to select the end point.');
+            map.once('click', function(event) {
+                startPoint = event.coordinate;
+                console.log('Start node:', startPoint);
 
-                map.once('click', function(evt) {
-                    endPoint = evt.coordinate;
-                    alert('End point selected. Calculating route...');
-                    calculateRoute();
+                map.once('click', function(event) {
+                    endPoint = event.coordinate;
+                    console.log('End node:', endPoint);
+                    calculateAndDisplayRoute();
                 });
             });
         });
 
-        function calculateRoute() {
+        function calculateAndDisplayRoute() {
             if (!startPoint || !endPoint) {
                 alert('Please select both start and end points.');
                 return;
@@ -306,6 +316,11 @@
             while (currNode !== JSON.stringify(startProj)) {
                 path.push(JSON.parse(currNode));
                 currNode = dijkstra[currNode].predecessor;
+
+                if (currNode === undefined) {
+                    alert('No route found between the selected points.');
+                    return;
+                }
             }
             path.push(startProj);
             path.reverse();
