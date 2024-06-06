@@ -17,7 +17,7 @@
     <!-- Graphlib and Graphlib-Dijkstra -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.9/graphlib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dot/0.1.7/graphlib-dot.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dijkstra/1.0.9/graphlib-dijkstra.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dijkstra/2.1.9/graphlib-dijkstra.min.js"></script>
 
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -160,7 +160,8 @@
                     color: 'blue',
                     width: 2
                 })
-            })
+            }),
+            visible: false
         });
 
         map.addLayer(routeLayer);
@@ -183,6 +184,8 @@
         document.getElementById('toggle-routing').addEventListener('click', function() {
             routingActive = !routingActive;
             this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
+            routeLayer.setVisible(routingActive);
+
             if (routingActive) {
                 map.once('click', function(event) {
                     startPoint = event.coordinate;
@@ -194,6 +197,8 @@
                         calculateAndDisplayRoute();
                     });
                 });
+            } else {
+                routeFeatureOverlay.getSource().clear();
             }
         });
 
@@ -222,54 +227,28 @@
                 }
             });
 
-            var path = dijkstra(graph, JSON.stringify(startProj), JSON.stringify(endProj));
-            if (!path) {
-                alert('No route found between the selected points.');
-                return;
+            var path = graphlib.alg.dijkstra(graph, JSON.stringify(startProj), function(v) {
+                return graph.nodeEdges(v).reduce((acc, e) => {
+                    acc[e.v === v ? e.w : e.v] = graph.edge(e);
+                    return acc;
+                }, {});
+            });
+
+            var route = [];
+            var node = JSON.stringify(endProj);
+            while (node !== JSON.stringify(startProj)) {
+                route.push(JSON.parse(node));
+                node = path[node].predecessor;
             }
+            route.push(startProj);
+            route.reverse();
 
             var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path.map(JSON.parse).map(ol.proj.fromLonLat))
+                geometry: new ol.geom.LineString(route.map(ol.proj.fromLonLat))
             });
 
             routeFeatureOverlay.getSource().clear();
             routeFeatureOverlay.getSource().addFeature(routeFeature);
-        }
-
-        function dijkstra(graph, start, end) {
-            var distances = {};
-            var predecessors = {};
-            var queue = new Set(graph.nodes());
-
-            distances[start] = 0;
-            queue.forEach(function(node) {
-                if (node !== start) distances[node] = Infinity;
-            });
-
-            while (queue.size > 0) {
-                var minNode = [...queue].reduce((min, node) => distances[node] < distances[min] ? node : min);
-                queue.delete(minNode);
-
-                if (minNode === end) {
-                    var path = [];
-                    while (predecessors[minNode]) {
-                        path.push(minNode);
-                        minNode = predecessors[minNode];
-                    }
-                    path.push(start);
-                    return path.reverse();
-                }
-
-                graph.successors(minNode).forEach(function(neighbor) {
-                    var alt = distances[minNode] + graph.edge(minNode, neighbor);
-                    if (alt < distances[neighbor]) {
-                        distances[neighbor] = alt;
-                        predecessors[neighbor] = minNode;
-                    }
-                });
-            }
-
-            return null;
         }
     </script>
 </body>
