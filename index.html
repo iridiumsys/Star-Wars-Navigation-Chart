@@ -19,9 +19,9 @@
 
     <!-- Graphlib and Graphlib-Dijkstra -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.9/graphlib.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib-dijkstra/2.0.1/graphlib-dijkstra.min.js"></script>
+    <script src="https://unpkg.com/graphlib-dijkstra@2.0.1/dist/graphlib-dijkstra.min.js"></script>
 
-    <!-- Custom scripts -->
+    <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <style type="text/css">
         body {
@@ -254,8 +254,6 @@
             })
         });
 
-        var routingSource = routeLayer.getSource();
-
         map.addLayer(routeLayer);
 
         var routeFeatureOverlay = new ol.layer.Vector({
@@ -310,7 +308,7 @@
             // Build the graph from the geojson data
             var graph = new graphlib.Graph();
 
-            routingSource.forEachFeature(function(feature) {
+            routeLayer.getSource().forEachFeature(function(feature) {
                 var geometry = feature.getGeometry();
                 var coordinates = geometry.getCoordinates();
 
@@ -331,9 +329,9 @@
             var currNode = JSON.stringify(endProj);
             while (currNode !== JSON.stringify(startProj)) {
                 path.push(JSON.parse(currNode));
-                currNode = dijkstra[currNode].predecessor;
-
-                if (currNode === undefined) {
+                if (dijkstra[currNode] && dijkstra[currNode].predecessor) {
+                    currNode = dijkstra[currNode].predecessor;
+                } else {
                     alert('No route found between the selected points.');
                     return;
                 }
