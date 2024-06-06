@@ -246,12 +246,7 @@
                 url: './layers/routes.geojson',
                 format: new ol.format.GeoJSON()
             }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'green',
-                    width: 2
-                })
-            })
+            style: transparentStyle
         });
 
         map.addLayer(routeLayer);
