@@ -162,6 +162,7 @@
     </div>
 
     <script>
+        // Initialize map and layers
         var map = new ol.Map({
             target: 'map',
             view: new ol.View({
@@ -190,14 +191,25 @@
         ];
 
         var currentBackgroundIndex = 0;
-
-        // Adding the initial background layer
         map.addLayer(backgroundLayers[currentBackgroundIndex]);
 
-        var toggleBackgroundButton = document.getElementById('toggle-background');
-        toggleBackgroundButton.addEventListener('click', function() {
+        document.getElementById('toggle-background').addEventListener('click', function() {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
             map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
+        });
+
+        // Search functionality
+        document.getElementById('search-button').addEventListener('click', function() {
+            var searchTerm = document.getElementById('search-input').value.toLowerCase();
+            systemsSource.forEachFeature(function(feature) {
+                var name = feature.get('NAME').toLowerCase();
+                var altName = feature.get('ALT_NAME').toLowerCase();
+                if (name.includes(searchTerm) || altName.includes(searchTerm)) {
+                    var coord = feature.getGeometry().getCoordinates();
+                    map.getView().animate({ center: coord, zoom: 15 });
+                    return;
+                }
+            });
         });
 
         var systemsSource = new ol.source.Vector({
@@ -224,7 +236,7 @@
 
         map.addLayer(systemsLayer);
 
-        // Routing Functionality
+        // Routing functionality
         var routeLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 url: './layers/routes.geojson',
@@ -248,13 +260,10 @@
                     width: 5
                 }),
                 text: new ol.style.Text({
-                    font: '15px Calibri,sans-serif',
-                    fill: new ol.style.Fill({
-                        color: '#000'
-                    }),
+                    font: '12px Calibri,sans-serif',
+                    fill: new ol.style.Fill({ color: 'black' }),
                     stroke: new ol.style.Stroke({
-                        color: '#fff',
-                        width: 3
+                        color: 'white', width: 3
                     })
                 })
             })
@@ -262,23 +271,24 @@
 
         map.addLayer(routeFeatureOverlay);
 
-        var startPoint = null;
-        var endPoint = null;
+        var startPoint, endPoint;
+        var routingActive = false;
 
-        var toggleRoutingButton = document.getElementById('toggle-routing');
-        toggleRoutingButton.addEventListener('click', function() {
-            alert('Click on the map to select the start and end points.');
-
-            map.once('click', function(event) {
-                startPoint = event.coordinate;
-                console.log('Start node:', startPoint);
-
+        document.getElementById('toggle-routing').addEventListener('click', function() {
+            routingActive = !routingActive;
+            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
+            if (routingActive) {
                 map.once('click', function(event) {
-                    endPoint = event.coordinate;
-                    console.log('End node:', endPoint);
-                    calculateAndDisplayRoute();
+                    startPoint = event.coordinate;
+                    console.log('Start node:', startPoint);
+
+                    map.once('click', function(event) {
+                        endPoint = event.coordinate;
+                        console.log('End node:', endPoint);
+                        calculateAndDisplayRoute();
+                    });
                 });
-            });
+            }
         });
 
         function calculateAndDisplayRoute() {
