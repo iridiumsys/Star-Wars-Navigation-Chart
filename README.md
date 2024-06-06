@@ -8,6 +8,4 @@ Firstly released as beta version on 2024/05/04, this project is still a work-in-
 I'll be aware of all your constructive remarks or suggestions !
 
 Planned developments :
-- Aesthetic improvements
-- Routing functionality
-- Search functionality
+- Routing functionality (WIP)
