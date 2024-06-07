@@ -198,8 +198,10 @@
             console.log('StartProj:', startProj);
             console.log('EndProj:', endProj);
 
-            var graph = new ol.ext.Dijkstra({
-                source: routeLayer.getSource()
+            // Create the graph manually
+            var graph = new ol.source.Dijkstra({
+                source: routeLayer.getSource(),
+                tolerance: 10 // Adjust tolerance as needed
             });
 
             var path = graph.path(startPoint, endPoint);
@@ -210,7 +212,9 @@
             }
 
             var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path)
+                geometry: new ol.geom.LineString(path.map(function(coord) {
+                    return ol.proj.fromLonLat(coord);
+                }))
             });
 
             routeFeatureOverlay.getSource().clear();
