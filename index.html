@@ -16,6 +16,11 @@
 
     <!-- Graphlib -->
     <script src="https://unpkg.com/graphlib@2.1.8/dist/graphlib.min.js"></script>
+
+    <!-- Custom styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" type="text/css">
 </head>
 <body>
     <div id="map"></div>
@@ -67,18 +72,88 @@
             map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
         });
 
+        // Search functionality
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input').value.trim();
+            if (!searchInput) {
+                alert('Please enter a system name');
+                return;
+            }
+
+            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
+            const vectorSource = systemsLayer.getSource();
+            const features = vectorSource.getFeatures();
+
+            let foundFeature = null;
+
+            for (let i = 0; i < features.length; i++) {
+                const feature = features[i];
+                const featureName = feature.get('NAME');
+                if (!featureName) continue; // Skip if feature doesn't have a NAME property
+                const nameWords = featureName.toLowerCase().split(' ');
+
+                // Check if any search word is a substring of any of the name words
+                const allWordsMatch = searchWords.every(searchWord =>
+                    nameWords.some(nameWord => nameWord.includes(searchWord))
+                );
+
+                if (allWordsMatch) {
+                    foundFeature = feature;
+                    break;
+                }
+            }
+
+            if (foundFeature) {
+                const geometry = foundFeature.getGeometry();
+                const extent = geometry.getExtent();
+                console.log('Feature Name:', foundFeature.get('NAME'));
+                console.log('Extent:', extent);
+
+                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+                } else {
+                    const center = ol.extent.getCenter(extent);
+                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                }
+            } else {
+                alert('System not found');
+                map.getView().setZoom(18); // Reset zoom if not found
+            }
+        }
+
+        document.getElementById('search-button').addEventListener('click', handleSearch);
+
+        var systemsSource = new ol.source.Vector({
+            url: './layers/systems.geojson',
+            format: new ol.format.GeoJSON(),
+        });
+
+        var transparentStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 0.5,
+                fill: new ol.style.Fill({
+                    color: 'rgba(0, 0, 0, 0)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0, 0, 0, 0)'
+                })
+            })
+        });
+
+        var systemsLayer = new ol.layer.Vector({
+            source: systemsSource,
+            style: transparentStyle
+        });
+
+        map.addLayer(systemsLayer);
+
         // Routing functionality
         var routeLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 url: './layers/routes.geojson',
                 format: new ol.format.GeoJSON()
             }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2
-                })
-            })
+            style: transparentStyle
         });
 
         map.addLayer(routeLayer);
@@ -123,25 +198,16 @@
 
             var startProj = ol.proj.toLonLat(startPoint);
             var endProj = ol.proj.toLonLat(endPoint);
+            console.log('StartProj:', startProj);
+            console.log('EndProj:', endProj);
 
-            var graph = new graphlib.Graph();
-
-            routeLayer.getSource().forEachFeature(function(feature) {
-                var geometry = feature.getGeometry();
-                var coordinates = geometry.getCoordinates();
-
-                for (var i = 0; i < coordinates.length - 1; i++) {
-                    var start = ol.proj.toLonLat(coordinates[i]);
-                    var end = ol.proj.toLonLat(coordinates[i + 1]);
-                    var distance = ol.sphere.getDistance(start, end);
-
-                    graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
-                    graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
-                }
+            var graph = new ol.source.Graph({
+                layer: routeLayer,
+                tolerance: 10 // distance tolerance in px to match nearest vertex
             });
 
-            var path = dijkstra(graph, JSON.stringify(startProj), JSON.stringify(endProj));
-            if (!path) {
+            var path = graph.dijkstra(startProj, endProj);
+            if (!path || path.length === 0) {
                 alert('No route found between the selected points.');
                 return;
             }
@@ -152,42 +218,6 @@
 
             routeFeatureOverlay.getSource().clear();
             routeFeatureOverlay.getSource().addFeature(routeFeature);
-        }
-
-        function dijkstra(graph, start, end) {
-            var distances = {};
-            var predecessors = {};
-            var queue = new Set(graph.nodes());
-
-            distances[start] = 0;
-            queue.forEach(function(node) {
-                if (node !== start) distances[node] = Infinity;
-            });
-
-            while (queue.size > 0) {
-                var minNode = [...queue].reduce((min, node) => distances[node] < distances[min] ? node : min);
-                queue.delete(minNode);
-
-                if (minNode === end) {
-                    var path = [];
-                    while (predecessors[minNode]) {
-                        path.push(JSON.parse(minNode));
-                        minNode = predecessors[minNode];
-                    }
-                    path.push(JSON.parse(start));
-                    return path.reverse();
-                }
-
-                graph.successors(minNode).forEach(function(neighbor) {
-                    var alt = distances[minNode] + graph.edge(minNode, neighbor);
-                    if (alt < distances[neighbor]) {
-                        distances[neighbor] = alt;
-                        predecessors[neighbor] = minNode;
-                    }
-                });
-            }
-
-            return null;
         }
     </script>
 </body>
