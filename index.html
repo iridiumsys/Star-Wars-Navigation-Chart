@@ -14,9 +14,6 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
     <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
 
-    <!-- Graphlib -->
-    <script src="https://unpkg.com/graphlib@2.1.8/dist/graphlib.min.js"></script>
-
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -201,12 +198,12 @@
             console.log('StartProj:', startProj);
             console.log('EndProj:', endProj);
 
-            var graph = new ol.ext.Graph({
-                layer: routeLayer,
-                tolerance: 10 // distance tolerance in px to match nearest vertex
+            var graph = new ol.ext.Dijkstra({
+                source: routeLayer.getSource()
             });
 
-            var path = graph.dijkstra(ol.proj.toLonLat(startPoint), ol.proj.toLonLat(endPoint));
+            var path = graph.path(startPoint, endPoint);
+
             if (!path || path.length === 0) {
                 alert('No route found between the selected points.');
                 return;
