@@ -14,8 +14,10 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
     <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
 
-    <!-- Graphlib -->
-    <script src="https://unpkg.com/graphlib@2.1.8/dist/graphlib.min.js"></script>
+    <!-- Geojson-dijkstra -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@graphlib/graphlib@2.1.8/dist/graphlib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/geojson-dijkstra@1.0.0/dist/geojson-dijkstra.min.js"></script>
 
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -201,44 +203,36 @@
             console.log('StartProj:', startProj);
             console.log('EndProj:', endProj);
 
-            var graph = new graphlib.Graph({ directed: true });
+            // Load route GeoJSON data
+            fetch('./layers/routes.geojson')
+                .then(response => response.json())
+                .then(routeData => {
+                    // Create graph from route GeoJSON
+                    var graph = geojsonDijkstra(routeData, { weightFn: function(a, b, props) { return props.cost; } });
 
-            routeLayer.getSource().forEachFeature(function(feature) {
-                var geometry = feature.getGeometry();
-                var coordinates = geometry.getCoordinates();
-                var properties = feature.getProperties();
-                
-                var startNode = JSON.stringify(properties._id_start);
-                var endNode = JSON.stringify(properties._id_end);
-                var cost = properties.cost;
+                    // Find path using Dijkstra algorithm
+                    var path = graph.findPath(startProj, endProj);
 
-                graph.setEdge(startNode, endNode, cost);
-            });
+                    if (!path || path.length === 0) {
+                        alert('No route found between the selected points.');
+                        return;
+                    }
 
-            var pathInfo = graphlib.alg.dijkstra(JSON.stringify(startProj), function(e) { return graph.edge(e); });
-            
-            var path = [];
-            var node = JSON.stringify(endProj);
-            while (node) {
-                path.unshift(JSON.parse(node));
-                node = pathInfo[node].predecessor;
-            }
+                    var routeCoords = path.map(function(coord) {
+                        return ol.proj.fromLonLat(coord);
+                    });
 
-            if (path.length === 0) {
-                alert('No route found between the selected points.');
-                return;
-            }
+                    var routeFeature = new ol.Feature({
+                        geometry: new ol.geom.LineString(routeCoords)
+                    });
 
-            var routeCoords = path.map(function(coord) {
-                return ol.proj.fromLonLat(coord);
-            });
-
-            var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(routeCoords)
-            });
-
-            routeFeatureOverlay.getSource().clear();
-            routeFeatureOverlay.getSource().addFeature(routeFeature);
+                    routeFeatureOverlay.getSource().clear();
+                    routeFeatureOverlay.getSource().addFeature(routeFeature);
+                })
+                .catch(error => {
+                    console.error('Error loading or processing route data:', error);
+                    alert('Error loading route data');
+                });
         }
     </script>
 </body>
