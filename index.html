@@ -1,225 +1,127 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Star Wars Navigation Chart</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Graphlib -->
+<script src="https://unpkg.com/graphlib@2.1.8/dist/graphlib.min.js"></script>
 
-    <!-- OpenLayers -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
-
-    <!-- ol-ext -->
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
-    <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
-
-    <!-- Custom styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-    <link rel="stylesheet" href="./style.css" type="text/css">
-</head>
-<body>
-    <div id="map"></div>
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system">
-        <button id="search-button">Search</button>
-    </div>
-    <div class="toggle-background-container">
-        <button id="toggle-background"><i class="fas fa-star"></i></button>
-    </div>
-    <div class="toggle-routing-container">
-        <button id="toggle-routing"><i class="fas fa-route"></i></button>
-    </div>
-
-    <script>
-        // Initialize map and layers
-        var map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
+<!-- Routing functionality -->
+<script>
+    var routeLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: './layers/routes.geojson',
+            format: new ol.format.GeoJSON()
+        }),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 2
             })
-        });
+        })
+    });
 
-        var backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'Space Background',
-            }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'White Background',
+    map.addLayer(routeLayer);
+
+    var routeFeatureOverlay = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 2
             })
-        ];
+        })
+    });
 
-        var currentBackgroundIndex = 0;
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+    map.addLayer(routeFeatureOverlay);
 
-        document.getElementById('toggle-background').addEventListener('click', function() {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
-        });
+    var startPoint, endPoint;
+    var routingActive = false;
 
-        // Search functionality
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value.trim();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
+    document.getElementById('toggle-routing').addEventListener('click', function() {
+        routingActive = !routingActive;
+        this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
+        if (routingActive) {
+            map.once('click', function(event) {
+                startPoint = event.coordinate;
+                console.log('Start node:', startPoint);
 
-            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
-            const vectorSource = systemsLayer.getSource();
-            const features = vectorSource.getFeatures();
-
-            let foundFeature = null;
-
-            for (let i = 0; i < features.length; i++) {
-                const feature = features[i];
-                const featureName = feature.get('NAME');
-                if (!featureName) continue; // Skip if feature doesn't have a NAME property
-                const nameWords = featureName.toLowerCase().split(' ');
-
-                // Check if any search word is a substring of any of the name words
-                const allWordsMatch = searchWords.every(searchWord =>
-                    nameWords.some(nameWord => nameWord.includes(searchWord))
-                );
-
-                if (allWordsMatch) {
-                    foundFeature = feature;
-                    break;
-                }
-            }
-
-            if (foundFeature) {
-                const geometry = foundFeature.getGeometry();
-                const extent = geometry.getExtent();
-                console.log('Feature Name:', foundFeature.get('NAME'));
-                console.log('Extent:', extent);
-
-                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
-                } else {
-                    const center = ol.extent.getCenter(extent);
-                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
-                }
-            } else {
-                alert('System not found');
-                map.getView().setZoom(18); // Reset zoom if not found
-            }
-        }
-
-        document.getElementById('search-button').addEventListener('click', handleSearch);
-
-        var systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
-        });
-
-        var transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)'
-                })
-            })
-        });
-
-        var systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle
-        });
-
-        map.addLayer(systemsLayer);
-
-        // Routing functionality
-        var routeLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                url: './layers/routes.geojson',
-                format: new ol.format.GeoJSON()
-            }),
-            style: transparentStyle
-        });
-
-        map.addLayer(routeLayer);
-
-        var routeFeatureOverlay = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2
-                })
-            })
-        });
-
-        map.addLayer(routeFeatureOverlay);
-
-        var startPoint, endPoint;
-        var routingActive = false;
-
-        document.getElementById('toggle-routing').addEventListener('click', function() {
-            routingActive = !routingActive;
-            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-            if (routingActive) {
                 map.once('click', function(event) {
-                    startPoint = event.coordinate;
-                    console.log('Start node:', startPoint);
-
-                    map.once('click', function(event) {
-                        endPoint = event.coordinate;
-                        console.log('End node:', endPoint);
-                        calculateAndDisplayRoute();
-                    });
+                    endPoint = event.coordinate;
+                    console.log('End node:', endPoint);
+                    calculateAndDisplayRoute();
                 });
+            });
+        }
+    });
+
+    function calculateAndDisplayRoute() {
+        if (!startPoint || !endPoint) {
+            alert('Please select both start and end points.');
+            return;
+        }
+
+        var startProj = ol.proj.toLonLat(startPoint);
+        var endProj = ol.proj.toLonLat(endPoint);
+
+        var graph = new graphlib.Graph();
+
+        routeLayer.getSource().forEachFeature(function(feature) {
+            var geometry = feature.getGeometry();
+            var coordinates = geometry.getCoordinates();
+
+            for (var i = 0; i < coordinates.length - 1; i++) {
+                var start = ol.proj.toLonLat(coordinates[i]);
+                var end = ol.proj.toLonLat(coordinates[i + 1]);
+                var distance = ol.sphere.getDistance(start, end);
+
+                graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
+                graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
             }
         });
 
-        function calculateAndDisplayRoute() {
-            if (!startPoint || !endPoint) {
-                alert('Please select both start and end points.');
-                return;
-            }
-
-            var startProj = ol.proj.toLonLat(startPoint);
-            var endProj = ol.proj.toLonLat(endPoint);
-            console.log('StartProj:', startProj);
-            console.log('EndProj:', endProj);
-
-            // Create the graph manually
-            var graph = new ol.source.Dijkstra({
-                source: routeLayer.getSource(),
-                tolerance: 10 // Adjust tolerance as needed
-            });
-
-            var path = graph.path(startPoint, endPoint);
-
-            if (!path || path.length === 0) {
-                alert('No route found between the selected points.');
-                return;
-            }
-
-            var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path.map(function(coord) {
-                    return ol.proj.fromLonLat(coord);
-                }))
-            });
-
-            routeFeatureOverlay.getSource().clear();
-            routeFeatureOverlay.getSource().addFeature(routeFeature);
+        var path = dijkstra(graph, JSON.stringify(startProj), JSON.stringify(endProj));
+        if (!path) {
+            alert('No route found between the selected points.');
+            return;
         }
-    </script>
-</body>
-</html>
+
+        var routeFeature = new ol.Feature({
+            geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat))
+        });
+
+        routeFeatureOverlay.getSource().clear();
+        routeFeatureOverlay.getSource().addFeature(routeFeature);
+    }
+
+    function dijkstra(graph, start, end) {
+        var distances = {};
+        var predecessors = {};
+        var queue = new Set(graph.nodes());
+
+        distances[start] = 0;
+        queue.forEach(function(node) {
+            if (node !== start) distances[node] = Infinity;
+        });
+
+        while (queue.size > 0) {
+            var minNode = [...queue].reduce((min, node) => distances[node] < distances[min] ? node : min);
+            queue.delete(minNode);
+
+            if (minNode === end) {
+                var path = [];
+                while (predecessors[minNode]) {
+                    path.push(JSON.parse(minNode));
+                    minNode = predecessors[minNode];
+                }
+                path.push(JSON.parse(start));
+                return path.reverse();
+            }
+
+            graph.successors(minNode).forEach(function(neighbor) {
+                var alt = distances[minNode] + graph.edge(minNode, neighbor);
+                if (alt < distances[neighbor]) {
+                    distances[neighbor] = alt;
+                    predecessors[neighbor] = minNode;
+                }
+            });
+        }
+
+        return null;
+    }
+</script>
