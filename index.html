@@ -145,51 +145,48 @@
         map.addLayer(systemsLayer);
 
         // Routing functionality
-        var routeLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                url: './layers/routes.geojson',
-                format: new ol.format.GeoJSON()
-            }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2
-                })
-            }),
-            visible: false
-        });
-
-        map.addLayer(routeLayer);
-
-        var routeFeatureOverlay = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2
-                })
+    var routeLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            url: './layers/routes.geojson',
+            format: new ol.format.GeoJSON()
+        }),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 2
             })
-        });
+        })
+    });
 
-        map.addLayer(routeFeatureOverlay);
+    map.addLayer(routeLayer);
 
-        var startPoint, endPoint;
-        var routingActive = false;
+    var routeFeatureOverlay = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: 'blue',
+                width: 2
+            })
+        })
+    });
 
-        document.getElementById('toggle-routing').addEventListener('click', function() {
-            routingActive = !routingActive;
-            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-            routeLayer.setVisible(routingActive);
+    map.addLayer(routeFeatureOverlay);
 
-            if (routingActive) {
+    var startPoint, endPoint;
+    var routingActive = false;
+
+    document.getElementById('toggle-routing').addEventListener('click', function() {
+        routingActive = !routingActive;
+        this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
+        if (routingActive) {
+            map.once('click', function(event) {
+                startPoint = event.coordinate;
+                console.log('Start node:', startPoint);
+
                 map.once('click', function(event) {
-                    startPoint = event.coordinate;
-                    console.log('Start node:', startPoint);
-
-                    map.once('click', function(event) {
-                        endPoint = event.coordinate;
-                        console.log('End node:', endPoint);
-calculateAndDisplayRoute();
+                    endPoint = event.coordinate;
+                    console.log('End node:', endPoint);
+                    calculateAndDisplayRoute();
                 });
             });
         }
@@ -203,8 +200,10 @@ calculateAndDisplayRoute();
 
         var startProj = ol.proj.toLonLat(startPoint);
         var endProj = ol.proj.toLonLat(endPoint);
+        console.log('StartProj:', startProj);
+        console.log('EndProj:', endProj);
 
-        var graph = new Map();
+        var graph = new graphlib.Graph();
 
         routeLayer.getSource().forEachFeature(function(feature) {
             var geometry = feature.getGeometry();
@@ -214,12 +213,11 @@ calculateAndDisplayRoute();
                 var start = ol.proj.toLonLat(coordinates[i]);
                 var end = ol.proj.toLonLat(coordinates[i + 1]);
                 var distance = ol.sphere.getDistance(start, end);
+                
+                console.log('Edge from', start, 'to', end, 'with distance', distance);
 
-                if (!graph.has(start)) graph.set(start, new Map());
-                if (!graph.has(end)) graph.set(end, new Map());
-
-                graph.get(start).set(end, distance);
-                graph.get(end).set(start, distance);
+                graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
+                graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
             }
         });
 
@@ -229,10 +227,10 @@ calculateAndDisplayRoute();
             return;
         }
 
-        var routeCoordinates = path.map(JSON.parse).map(ol.proj.fromLonLat);
+        console.log('Path:', path);
 
         var routeFeature = new ol.Feature({
-            geometry: new ol.geom.LineString(routeCoordinates)
+            geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat))
         });
 
         routeFeatureOverlay.getSource().clear();
@@ -240,34 +238,34 @@ calculateAndDisplayRoute();
     }
 
     function dijkstra(graph, start, end) {
-        var distances = new Map();
-        var predecessors = new Map();
-        var queue = new Set(graph.keys());
+        var distances = {};
+        var predecessors = {};
+        var queue = new Set(graph.nodes());
 
-        distances.set(start, 0);
+        distances[start] = 0;
         queue.forEach(function(node) {
-            if (node !== start) distances.set(node, Infinity);
+            if (node !== start) distances[node] = Infinity;
         });
 
         while (queue.size > 0) {
-            var minNode = [...queue].reduce((min, node) => distances.get(node) < distances.get(min) ? node : min);
+            var minNode = [...queue].reduce((min, node) => distances[node] < distances[min] ? node : min);
             queue.delete(minNode);
 
             if (minNode === end) {
                 var path = [];
-                while (predecessors.get(minNode)) {
-                    path.push(minNode);
-                    minNode = predecessors.get(minNode);
+                while (predecessors[minNode]) {
+                    path.push(JSON.parse(minNode));
+                    minNode = predecessors[minNode];
                 }
-                path.push(start);
+                path.push(JSON.parse(start));
                 return path.reverse();
             }
 
-            graph.get(minNode).forEach(function(distance, neighbor) {
-                var alt = distances.get(minNode) + distance;
-                if (alt < distances.get(neighbor)) {
-                    distances.set(neighbor, alt);
-                    predecessors.set(neighbor, minNode);
+            graph.successors(minNode).forEach(function(neighbor) {
+                var alt = distances[minNode] + graph.edge(minNode, neighbor);
+                if (alt < distances[neighbor]) {
+                    distances[neighbor] = alt;
+                    predecessors[neighbor] = minNode;
                 }
             });
         }
