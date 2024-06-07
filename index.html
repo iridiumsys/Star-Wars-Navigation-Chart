@@ -208,23 +208,29 @@
                 var coordinates = geometry.getCoordinates();
                 var properties = feature.getProperties();
                 
-                var startNode = properties._id_start;
-                var endNode = properties._id_end;
+                var startNode = JSON.stringify(properties._id_start);
+                var endNode = JSON.stringify(properties._id_end);
                 var cost = properties.cost;
 
                 graph.setEdge(startNode, endNode, cost);
             });
 
-            var path = graphlib.alg.dijkstra(graph, JSON.stringify(startProj), function(e) { return graph.edge(e); });
-            if (!path || path.length === 0) {
+            var pathInfo = graphlib.alg.dijkstra(JSON.stringify(startProj), function(e) { return graph.edge(e); });
+            
+            var path = [];
+            var node = JSON.stringify(endProj);
+            while (node) {
+                path.unshift(JSON.parse(node));
+                node = pathInfo[node].predecessor;
+            }
+
+            if (path.length === 0) {
                 alert('No route found between the selected points.');
                 return;
             }
 
-            var routeCoords = [];
-            path.forEach(function(node) {
-                var coord = JSON.parse(node);
-                routeCoords.push(ol.proj.fromLonLat(coord));
+            var routeCoords = path.map(function(coord) {
+                return ol.proj.fromLonLat(coord);
             });
 
             var routeFeature = new ol.Feature({
