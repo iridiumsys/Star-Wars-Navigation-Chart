@@ -201,19 +201,34 @@
             console.log('StartProj:', startProj);
             console.log('EndProj:', endProj);
 
-            var graph = new ol.source.Graph({
-                layer: routeLayer,
-                tolerance: 10 // distance tolerance in px to match nearest vertex
+            var graph = new graphlib.Graph({ directed: true });
+
+            routeLayer.getSource().forEachFeature(function(feature) {
+                var geometry = feature.getGeometry();
+                var coordinates = geometry.getCoordinates();
+                var properties = feature.getProperties();
+                
+                var startNode = properties._id_start;
+                var endNode = properties._id_end;
+                var cost = properties.cost;
+
+                graph.setEdge(startNode, endNode, cost);
             });
 
-            var path = graph.dijkstra(startProj, endProj);
+            var path = graphlib.alg.dijkstra(graph, JSON.stringify(startProj), function(e) { return graph.edge(e); });
             if (!path || path.length === 0) {
                 alert('No route found between the selected points.');
                 return;
             }
 
+            var routeCoords = [];
+            path.forEach(function(node) {
+                var coord = JSON.parse(node);
+                routeCoords.push(ol.proj.fromLonLat(coord));
+            });
+
             var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat))
+                geometry: new ol.geom.LineString(routeCoords)
             });
 
             routeFeatureOverlay.getSource().clear();
