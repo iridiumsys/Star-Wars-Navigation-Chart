@@ -5,19 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- OpenLayers -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
-    <!-- ol-ext -->
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
-    <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
-
-    <!-- Geojson-dijkstra -->
+    <!-- Turf.js -->
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@graphlib/graphlib@2.1.8/dist/graphlib.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/geojson-dijkstra@1.0.0/dist/geojson-dijkstra.min.js"></script>
 
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -25,7 +18,7 @@
     <link rel="stylesheet" href="./style.css" type="text/css">
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search a system">
         <button id="search-button">Search</button>
@@ -38,139 +31,135 @@
     </div>
 
     <script>
-        // Initialize map and layers
-        var map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            })
+        mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v10', // Initial style, will be replaced by XYZ layers
+            center: [0.00847486, -0.0109944], // Initial center coordinates
+            zoom: 18 // Initial zoom level
         });
 
+        // Custom XYZ layers
         var backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'Space Background',
-            }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22
-                }),
-                attribution: 'White Background',
-            })
+            {
+                id: 'space-background',
+                type: 'raster',
+                source: {
+                    type: 'raster',
+                    tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
+                    tileSize: 256,
+                    minzoom: 16,
+                    maxzoom: 22
+                },
+                layout: { visibility: 'visible' }
+            },
+            {
+                id: 'white-background',
+                type: 'raster',
+                source: {
+                    type: 'raster',
+                    tiles: ['./XYZ/{z}/{x}/{y}.png'],
+                    tileSize: 256,
+                    minzoom: 16,
+                    maxzoom: 22
+                },
+                layout: { visibility: 'none' }
+            }
         ];
 
+        map.on('load', function() {
+            map.addLayer(backgroundLayers[0]);
+            map.addLayer(backgroundLayers[1]);
+
+            map.addSource('systems', {
+                type: 'geojson',
+                data: './layers/systems.geojson'
+            });
+
+            map.addLayer({
+                id: 'systems',
+                type: 'circle',
+                source: 'systems',
+                paint: {
+                    'circle-radius': 5,
+                    'circle-color': '#f00',
+                    'circle-opacity': 0
+                }
+            });
+
+            map.addSource('routes', {
+                type: 'geojson',
+                data: './layers/routes.geojson'
+            });
+
+            map.addLayer({
+                id: 'routes',
+                type: 'line',
+                source: 'routes',
+                paint: {
+                    'line-color': '#000',
+                    'line-opacity': 0
+                }
+            });
+
+            map.addLayer({
+                id: 'route-highlight',
+                type: 'line',
+                source: {
+                    type: 'geojson',
+                    data: {
+                        type: 'FeatureCollection',
+                        features: []
+                    }
+                },
+                paint: {
+                    'line-color': '#00f',
+                    'line-width': 2
+                }
+            });
+        });
+
         var currentBackgroundIndex = 0;
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
 
         document.getElementById('toggle-background').addEventListener('click', function() {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
+            map.setLayoutProperty(backgroundLayers[0].id, 'visibility', currentBackgroundIndex === 0 ? 'visible' : 'none');
+            map.setLayoutProperty(backgroundLayers[1].id, 'visibility', currentBackgroundIndex === 1 ? 'visible' : 'none');
         });
 
-        // Search functionality
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value.trim();
+        document.getElementById('search-button').addEventListener('click', function() {
+            const searchInput = document.getElementById('search-input').value.trim().toLowerCase();
             if (!searchInput) {
                 alert('Please enter a system name');
                 return;
             }
 
-            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
-            const vectorSource = systemsLayer.getSource();
-            const features = vectorSource.getFeatures();
+            map.getSource('systems').setData('./layers/systems.geojson');
 
-            let foundFeature = null;
+            map.on('data', function(event) {
+                if (event.sourceId === 'systems' && event.isSourceLoaded) {
+                    const features = map.querySourceFeatures('systems');
+                    let foundFeature = null;
 
-            for (let i = 0; i < features.length; i++) {
-                const feature = features[i];
-                const featureName = feature.get('NAME');
-                if (!featureName) continue; // Skip if feature doesn't have a NAME property
-                const nameWords = featureName.toLowerCase().split(' ');
+                    for (let feature of features) {
+                        const featureName = feature.properties.NAME ? feature.properties.NAME.toLowerCase() : '';
+                        if (searchInput.split(' ').every(word => featureName.includes(word))) {
+                            foundFeature = feature;
+                            break;
+                        }
+                    }
 
-                // Check if any search word is a substring of any of the name words
-                const allWordsMatch = searchWords.every(searchWord =>
-                    nameWords.some(nameWord => nameWord.includes(searchWord))
-                );
-
-                if (allWordsMatch) {
-                    foundFeature = feature;
-                    break;
+                    if (foundFeature) {
+                        const bbox = turf.bbox(foundFeature);
+                        map.fitBounds(bbox, { padding: 20 });
+                    } else {
+                        alert('System not found');
+                        map.setZoom(18);
+                    }
                 }
-            }
-
-            if (foundFeature) {
-                const geometry = foundFeature.getGeometry();
-                const extent = geometry.getExtent();
-                console.log('Feature Name:', foundFeature.get('NAME'));
-                console.log('Extent:', extent);
-
-                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
-                } else {
-                    const center = ol.extent.getCenter(extent);
-                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
-                }
-            } else {
-                alert('System not found');
-                map.getView().setZoom(18); // Reset zoom if not found
-            }
-        }
-
-        document.getElementById('search-button').addEventListener('click', handleSearch);
-
-        var systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
+            });
         });
-
-        var transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)'
-                })
-            })
-        });
-
-        var systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle
-        });
-
-        map.addLayer(systemsLayer);
-
-        // Routing functionality
-        var routeLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                url: './layers/routes.geojson',
-                format: new ol.format.GeoJSON()
-            }),
-            style: transparentStyle
-        });
-
-        map.addLayer(routeLayer);
-
-        var routeFeatureOverlay = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2
-                })
-            })
-        });
-
-        map.addLayer(routeFeatureOverlay);
 
         var startPoint, endPoint;
         var routingActive = false;
@@ -180,12 +169,9 @@
             this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
             if (routingActive) {
                 map.once('click', function(event) {
-                    startPoint = event.coordinate;
-                    console.log('Start node:', startPoint);
-
+                    startPoint = [event.lngLat.lng, event.lngLat.lat];
                     map.once('click', function(event) {
-                        endPoint = event.coordinate;
-                        console.log('End node:', endPoint);
+                        endPoint = [event.lngLat.lng, event.lngLat.lat];
                         calculateAndDisplayRoute();
                     });
                 });
@@ -198,36 +184,27 @@
                 return;
             }
 
-            var startProj = ol.proj.toLonLat(startPoint);
-            var endProj = ol.proj.toLonLat(endPoint);
-            console.log('StartProj:', startProj);
-            console.log('EndProj:', endProj);
-
-            // Load route GeoJSON data
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
-                    // Create graph from route GeoJSON
-                    var graph = geojsonDijkstra(routeData, { weightFn: function(a, b, props) { return props.cost; } });
-
-                    // Find path using Dijkstra algorithm
-                    var path = graph.findPath(startProj, endProj);
+                    var graph = geojsonDijkstra(routeData, { weightFn: (a, b, props) => props.cost });
+                    var path = graph.findPath(startPoint, endPoint);
 
                     if (!path || path.length === 0) {
                         alert('No route found between the selected points.');
                         return;
                     }
 
-                    var routeCoords = path.map(function(coord) {
-                        return ol.proj.fromLonLat(coord);
-                    });
+                    var routeCoords = path.map(coord => [coord[0], coord[1]]);
+                    var routeGeoJSON = {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: routeCoords
+                        }
+                    };
 
-                    var routeFeature = new ol.Feature({
-                        geometry: new ol.geom.LineString(routeCoords)
-                    });
-
-                    routeFeatureOverlay.getSource().clear();
-                    routeFeatureOverlay.getSource().addFeature(routeFeature);
+                    map.getSource('route-highlight').setData(routeGeoJSON);
                 })
                 .catch(error => {
                     console.error('Error loading or processing route data:', error);
