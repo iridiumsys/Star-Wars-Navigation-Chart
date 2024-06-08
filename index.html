@@ -201,24 +201,31 @@
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
-                    var graph = geojsonDijkstra(routeData, { weightFn: (a, b, props) => props.cost });
-                    var path = graph.findPath(startPoint, endPoint);
+                    // Turf.js to find the shortest path
+                    const pointStart = turf.point(startPoint);
+                    const pointEnd = turf.point(endPoint);
+                    const features = routeData.features;
 
-                    if (!path || path.length === 0) {
+                    let shortestDistance = Infinity;
+                    let bestRoute = null;
+
+                    features.forEach(feature => {
+                        const line = feature.geometry;
+                        const distanceStart = turf.pointToLineDistance(pointStart, line, { units: 'kilometers' });
+                        const distanceEnd = turf.pointToLineDistance(pointEnd, line, { units: 'kilometers' });
+
+                        if (distanceStart + distanceEnd < shortestDistance) {
+                            shortestDistance = distanceStart + distanceEnd;
+                            bestRoute = feature;
+                        }
+                    });
+
+                    if (!bestRoute) {
                         alert('No route found between the selected points.');
                         return;
                     }
 
-                    var routeCoords = path.map(coord => [coord[0], coord[1]]);
-                    var routeGeoJSON = {
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: routeCoords
-                        }
-                    };
-
-                    map.getSource('route-highlight').setData(routeGeoJSON);
+                    map.getSource('route-highlight').setData(bestRoute);
                 })
                 .catch(error => {
                     console.error('Error loading or processing route data:', error);
