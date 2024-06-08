@@ -52,7 +52,7 @@
                 source: {
                     type: 'raster',
                     tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
-                    tileSize: 256,
+                    tileSize: 512,
                     minzoom: 16,
                     maxzoom: 22
                 },
@@ -64,7 +64,7 @@
                 source: {
                     type: 'raster',
                     tiles: ['./XYZ/{z}/{x}/{y}.png'],
-                    tileSize: 256,
+                    tileSize: 512,
                     minzoom: 16,
                     maxzoom: 22
                 },
@@ -73,57 +73,65 @@
         ];
 
         map.on('load', function() {
-            map.addSource('space-background', backgroundLayers[0].source);
-            map.addLayer(backgroundLayers[0]);
-            map.addSource('white-background', backgroundLayers[1].source);
-            map.addLayer(backgroundLayers[1]);
+            if (!map.getSource('space-background')) {
+                map.addSource('space-background', backgroundLayers[0].source);
+                map.addLayer(backgroundLayers[0]);
+            }
+            if (!map.getSource('white-background')) {
+                map.addSource('white-background', backgroundLayers[1].source);
+                map.addLayer(backgroundLayers[1]);
+            }
 
-            map.addSource('systems', {
-                type: 'geojson',
-                data: './layers/systems.geojson'
-            });
-
-            map.addLayer({
-                id: 'systems',
-                type: 'circle',
-                source: 'systems',
-                paint: {
-                    'circle-radius': 5,
-                    'circle-color': '#f00',
-                    'circle-opacity': 0
-                }
-            });
-
-            map.addSource('routes', {
-                type: 'geojson',
-                data: './layers/routes.geojson'
-            });
-
-            map.addLayer({
-                id: 'routes',
-                type: 'line',
-                source: 'routes',
-                paint: {
-                    'line-color': '#000',
-                    'line-opacity': 0
-                }
-            });
-
-            map.addLayer({
-                id: 'route-highlight',
-                type: 'line',
-                source: {
+            if (!map.getSource('systems')) {
+                map.addSource('systems', {
                     type: 'geojson',
-                    data: {
-                        type: 'FeatureCollection',
-                        features: []
+                    data: './layers/systems.geojson'
+                });
+
+                map.addLayer({
+                    id: 'systems',
+                    type: 'circle',
+                    source: 'systems',
+                    paint: {
+                        'circle-radius': 5,
+                        'circle-color': '#f00',
+                        'circle-opacity': 0
                     }
-                },
-                paint: {
-                    'line-color': '#00f',
-                    'line-width': 2
-                }
-            });
+                });
+            }
+
+            if (!map.getSource('routes')) {
+                map.addSource('routes', {
+                    type: 'geojson',
+                    data: './layers/routes.geojson'
+                });
+
+                map.addLayer({
+                    id: 'routes',
+                    type: 'line',
+                    source: 'routes',
+                    paint: {
+                        'line-color': '#000',
+                        'line-opacity': 0
+                    }
+                });
+
+                map.addLayer({
+                    id: 'route-highlight',
+                    type: 'line',
+                    source: {
+                        type: 'geojson',
+                        data: {
+                            type: 'FeatureCollection',
+                            features: []
+                        }
+                    },
+                    paint: {
+                        'line-color': '#00f',
+                        'line-width': 2
+                    }
+                });
+            }
         });
 
         var currentBackgroundIndex = 0;
