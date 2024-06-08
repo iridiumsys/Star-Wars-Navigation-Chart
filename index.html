@@ -16,6 +16,13 @@
 </head>
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search a system">
+        <button id="search-button">Search</button>
+    </div>
+    <div class="toggle-background-container">
+        <button id="toggle-background"><i class="fas fa-star"></i></button>
+    </div>
 
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
@@ -28,14 +35,14 @@
                     'space-background': {
                         type: 'raster',
                         tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
-                        tileSize: 512,
+                        tileSize: 256,
                         minzoom: 16,
                         maxzoom: 22
                     },
                     'white-background': {
                         type: 'raster',
                         tiles: ['./XYZ/{z}/{x}/{y}.png'],
-                        tileSize: 512,
+                        tileSize: 256,
                         minzoom: 16,
                         maxzoom: 22
                     },
@@ -86,6 +93,52 @@
             zoom: 18
         });
 
+        // Toggle background functionality
+        var currentBackground = 'space-background';
+
+        document.getElementById('toggle-background').addEventListener('click', function() {
+            var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
+            map.setLayoutProperty(currentBackground, 'visibility', 'none');
+            map.setLayoutProperty(newBackground, 'visibility', 'visible');
+            currentBackground = newBackground;
+        });
+
+        // Search functionality
+        document.getElementById('search-button').addEventListener('click', function() {
+            const searchInput = document.getElementById('search-input').value.trim();
+            if (!searchInput) {
+                alert('Please enter a system name');
+                return;
+            }
+
+            const searchWords = searchInput.toLowerCase().split(' ');
+
+            const features = map.querySourceFeatures('systems');
+            let foundFeature = null;
+
+            for (const feature of features) {
+                const featureName = feature.properties.NAME;
+                if (!featureName) continue;
+                const nameWords = featureName.toLowerCase().split(' ');
+
+                const allWordsMatch = searchWords.every(searchWord =>
+                    nameWords.some(nameWord => nameWord.includes(searchWord))
+                );
+
+                if (allWordsMatch) {
+                    foundFeature = feature;
+                    break;
+                }
+            }
+
+            if (foundFeature) {
+                const coordinates = foundFeature.geometry.coordinates;
+                map.flyTo({ center: coordinates, zoom: 20 });
+            } else {
+                alert('System not found');
+                map.setZoom(18); // Reset zoom if not found
+            }
+        });
     </script>
 </body>
 </html>
