@@ -93,6 +93,15 @@
             zoom: 18
         });
 
+        var allFeatures = [];
+
+        // Load all features from the systems.geojson
+        fetch('./layers/systems.geojson')
+            .then(response => response.json())
+            .then(data => {
+                allFeatures = data.features;
+            });
+
         // Toggle background functionality
         var currentBackground = 'space-background';
 
@@ -113,10 +122,9 @@
 
             const searchWords = searchInput.toLowerCase().split(' ');
 
-            const features = map.querySourceFeatures('systems');
             let foundFeature = null;
 
-            for (const feature of features) {
+            for (const feature of allFeatures) {
                 const featureName = feature.properties.NAME;
                 if (!featureName) continue;
                 const nameWords = featureName.toLowerCase().split(' ');
