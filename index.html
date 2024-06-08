@@ -9,9 +9,6 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
-    <!-- Turf.js -->
-    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0"></script>
-
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -19,16 +16,6 @@
 </head>
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
-    <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system">
-        <button id="search-button">Search</button>
-    </div>
-    <div class="toggle-background-container">
-        <button id="toggle-background"><i class="fas fa-star"></i></button>
-    </div>
-    <div class="toggle-routing-container">
-        <button id="toggle-routing"><i class="fas fa-route"></i></button>
-    </div>
 
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
@@ -37,201 +24,68 @@
             container: 'map',
             style: {
                 version: 8,
-                sources: {},
-                layers: []
+                sources: {
+                    'space-background': {
+                        type: 'raster',
+                        tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
+                        tileSize: 512,
+                        minzoom: 16,
+                        maxzoom: 22
+                    },
+                    'white-background': {
+                        type: 'raster',
+                        tiles: ['./XYZ/{z}/{x}/{y}.png'],
+                        tileSize: 512,
+                        minzoom: 16,
+                        maxzoom: 22
+                    },
+                    'systems': {
+                        type: 'geojson',
+                        data: './layers/systems.geojson'
+                    },
+                    'routes': {
+                        type: 'geojson',
+                        data: './layers/routes.geojson'
+                    }
+                },
+                layers: [
+                    {
+                        id: 'space-background',
+                        type: 'raster',
+                        source: 'space-background',
+                        layout: { visibility: 'visible' }
+                    },
+                    {
+                        id: 'white-background',
+                        type: 'raster',
+                        source: 'white-background',
+                        layout: { visibility: 'none' }
+                    },
+                    {
+                        id: 'systems',
+                        type: 'circle',
+                        source: 'systems',
+                        paint: {
+                            'circle-radius': 5,
+                            'circle-color': '#f00',
+                            'circle-opacity': 0 // Initially hidden
+                        }
+                    },
+                    {
+                        id: 'routes',
+                        type: 'line',
+                        source: 'routes',
+                        paint: {
+                            'line-color': '#000',
+                            'line-opacity': 0 // Initially hidden
+                        }
+                    }
+                ]
             },
             center: [0.00847486, -0.0109944],
             zoom: 18
         });
 
-        // Custom XYZ layers
-        var backgroundLayers = [
-            {
-                id: 'space-background',
-                type: 'raster',
-                source: {
-                    type: 'raster',
-                    tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
-                    tileSize: 512,
-                    minzoom: 16,
-                    maxzoom: 22
-                },
-                layout: { visibility: 'visible' }
-            },
-            {
-                id: 'white-background',
-                type: 'raster',
-                source: {
-                    type: 'raster',
-                    tiles: ['./XYZ/{z}/{x}/{y}.png'],
-                    tileSize: 512,
-                    minzoom: 16,
-                    maxzoom: 22
-                },
-                layout: { visibility: 'none' }
-            }
-        ];
-
-        map.on('load', function() {
-            if (!map.getSource('space-background')) {
-                map.addSource('space-background', backgroundLayers[0].source);
-                map.addLayer(backgroundLayers[0]);
-            }
-            if (!map.getSource('white-background')) {
-                map.addSource('white-background', backgroundLayers[1].source);
-                map.addLayer(backgroundLayers[1]);
-            }
-
-            if (!map.getSource('systems')) {
-                map.addSource('systems', {
-                    type: 'geojson',
-                    data: './layers/systems.geojson'
-                });
-
-                map.addLayer({
-                    id: 'systems',
-                    type: 'circle',
-                    source: 'systems',
-                    paint: {
-                        'circle-radius': 5,
-                        'circle-color': '#f00',
-                        'circle-opacity': 0
-                    }
-                });
-            }
-
-            if (!map.getSource('routes')) {
-                map.addSource('routes', {
-                    type: 'geojson',
-                    data: './layers/routes.geojson'
-                });
-
-                map.addLayer({
-                    id: 'routes',
-                    type: 'line',
-                    source: 'routes',
-                    paint: {
-                        'line-color': '#000',
-                        'line-opacity': 0
-                    }
-                });
-
-                map.addLayer({
-                    id: 'route-highlight',
-                    type: 'line',
-                    source: {
-                        type: 'geojson',
-                        data: {
-                            type: 'FeatureCollection',
-                            features: []
-                        }
-                    },
-                    paint: {
-                        'line-color': '#00f',
-                        'line-width': 2
-                    }
-                });
-            }
-        });
-
-        var currentBackgroundIndex = 0;
-
-        document.getElementById('toggle-background').addEventListener('click', function() {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.setLayoutProperty(backgroundLayers[0].id, 'visibility', currentBackgroundIndex === 0 ? 'visible' : 'none');
-            map.setLayoutProperty(backgroundLayers[1].id, 'visibility', currentBackgroundIndex === 1 ? 'visible' : 'none');
-        });
-
-        document.getElementById('search-button').addEventListener('click', function() {
-            const searchInput = document.getElementById('search-input').value.trim().toLowerCase();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
-
-            map.getSource('systems').setData('./layers/systems.geojson');
-
-            map.on('data', function(event) {
-                if (event.sourceId === 'systems' && event.isSourceLoaded) {
-                    const features = map.querySourceFeatures('systems');
-                    let foundFeature = null;
-
-                    for (let feature of features) {
-                        const featureName = feature.properties.NAME ? feature.properties.NAME.toLowerCase() : '';
-                        if (searchInput.split(' ').every(word => featureName.includes(word))) {
-                            foundFeature = feature;
-                            break;
-                        }
-                    }
-
-                    if (foundFeature) {
-                        const bbox = turf.bbox(foundFeature);
-                        map.fitBounds(bbox, { padding: 20 });
-                    } else {
-                        alert('System not found');
-                        map.setZoom(18);
-                    }
-                }
-            });
-        });
-
-        var startPoint, endPoint;
-        var routingActive = false;
-
-        document.getElementById('toggle-routing').addEventListener('click', function() {
-            routingActive = !routingActive;
-            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-            if (routingActive) {
-                map.once('click', function(event) {
-                    startPoint = [event.lngLat.lng, event.lngLat.lat];
-                    map.once('click', function(event) {
-                        endPoint = [event.lngLat.lng, event.lngLat.lat];
-                        calculateAndDisplayRoute();
-                    });
-                });
-            }
-        });
-
-        function calculateAndDisplayRoute() {
-            if (!startPoint || !endPoint) {
-                alert('Please select both start and end points.');
-                return;
-            }
-
-            fetch('./layers/routes.geojson')
-                .then(response => response.json())
-                .then(routeData => {
-                    // Turf.js to find the shortest path
-                    const pointStart = turf.point(startPoint);
-                    const pointEnd = turf.point(endPoint);
-                    const features = routeData.features;
-
-                    let shortestDistance = Infinity;
-                    let bestRoute = null;
-
-                    features.forEach(feature => {
-                        const line = feature.geometry;
-                        const distanceStart = turf.pointToLineDistance(pointStart, line, { units: 'kilometers' });
-                        const distanceEnd = turf.pointToLineDistance(pointEnd, line, { units: 'kilometers' });
-
-                        if (distanceStart + distanceEnd < shortestDistance) {
-                            shortestDistance = distanceStart + distanceEnd;
-                            bestRoute = feature;
-                        }
-                    });
-
-                    if (!bestRoute) {
-                        alert('No route found between the selected points.');
-                        return;
-                    }
-
-                    map.getSource('route-highlight').setData(bestRoute);
-                })
-                .catch(error => {
-                    console.error('Error loading or processing route data:', error);
-                    alert('Error loading route data');
-                });
-        }
     </script>
 </body>
 </html>
