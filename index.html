@@ -421,4 +421,10 @@
                 var path = dijkstra.pathTo(endNodeIndex);
                 return path.map(edge => routeData.features[edge.either()].geometry.coordinates).flat();
             } else {
-                console.error('No path found
+                console.error('No path found between the selected points.');
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
