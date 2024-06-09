@@ -1,4 +1,4 @@
-<!-- Version 1.4 -->
+<!-- Version 1.6 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,8 +13,8 @@
     <!-- Turf.js -->
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
-    <!-- jsgraphs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-graph-algorithms/1.5.7/js-graph-algorithms.min.js"></script>
+    <!-- js-graph-algorithms (from jsDelivr CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/js-graph-algorithms@1.5.7"></script>
 
     <!-- Mapbox Directions Plugin -->
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.css" rel="stylesheet" />
@@ -238,37 +238,40 @@
 
                         // Update the route-line source with the new route data
                         map.getSource('route-line').setData(route);
-                    } else {
-                        alert('No route found');
                     }
+                })
+                .catch(error => {
+                    console.error('Error loading or processing route data:', error);
                 });
         }
 
         function findRoute(routeData, start, end) {
-            // Initialize the graph
-            var graph = new jsgraphs.Graph(routeData.features.length);
+            var graph = new jsgraphs.WeightedGraph(routeData.features.length);
 
-            // Build the graph from the route data
-            routeData.features.forEach(function(feature, index) {
-                var from = feature.properties.from;
-                var to = feature.properties.to;
-                var weight = turf.length(feature); // Use Turf.js to calculate the length of the feature
-                graph.addEdge(new jsgraphs.Edge(from, to, weight));
+            routeData.features.forEach((feature, index) => {
+                var coordinates = feature.geometry.coordinates;
+                for (var i = 0; i < coordinates.length - 1; i++) {
+                    var startNode = coordinates[i];
+                    var endNode = coordinates[i + 1];
+                    var weight = turf.distance(turf.point(startNode), turf.point(endNode));
+
+                    var startIndex = index;
+                    var endIndex = index + 1;
+                    graph.addEdge(new jsgraphs.Edge(startIndex, endIndex, weight));
+                }
             });
 
-            // Implement Dijkstra's algorithm to find the shortest path
-            var dijkstra = new jsgraphs.Dijkstra(graph, 0);
-            var path = dijkstra.pathTo(1); // Example, you need to find the actual path
+            var startNodeIndex = 0; // Assume start node index is 0
+            var endNodeIndex = routeData.features.length - 1; // Assume end node index is the last feature index
+            var dijkstra = new jsgraphs.Dijkstra(graph, startNodeIndex);
 
-            // Extract coordinates from path
-            var extractedPath = [];
-            path.forEach(function(edge) {
-                var routeFeature = routeData.features[edge.from()];
-                var coords = routeFeature.geometry.coordinates;
-                extractedPath = extractedPath.concat(coords);
-            });
-
-            return extractedPath;
+            if (dijkstra.hasPathTo(endNodeIndex)) {
+                var path = dijkstra.pathTo(endNodeIndex);
+                return path.map(edge => routeData.features[edge.from()].geometry.coordinates).flat();
+            } else {
+                console.error('No path found between the selected points.');
+                return null;
+            }
         }
     </script>
 </body>
