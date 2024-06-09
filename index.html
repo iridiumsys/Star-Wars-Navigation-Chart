@@ -200,37 +200,25 @@
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
-                    // Create a graph from the routes data
-                    var graph = new jsgraphs.WeightedDiGraph(routeData.features.length);
+                    // Find the shortest path using Turf.js
+                    var lineStrings = routeData.features.map(feature => feature.geometry.coordinates);
 
-                    routeData.features.forEach((feature, index) => {
-                        var coordinates = feature.geometry.coordinates;
-                        for (var i = 0; i < coordinates.length - 1; i++) {
-                            var start = coordinates[i];
-                            var end = coordinates[i + 1];
-                            var weight = turf.distance(turf.point(start), turf.point(end));
-                            graph.addEdge(new jsgraphs.Edge(i, i + 1, weight));
-                        }
-                    });
+                    var closestLineStart = turf.nearestPointOnLine(turf.lineString(lineStrings.flat()), turf.point(startPoint));
+                    var closestLineEnd = turf.nearestPointOnLine(turf.lineString(lineStrings.flat()), turf.point(endPoint));
 
-                    // Find the shortest path
-                    var dijkstra = new jsgraphs.Dijkstra(graph, 0);
-                    var path = dijkstra.pathTo(1); // Change to correct indices
-
-                    // Create a feature collection for the route
                     var route = {
                         type: 'FeatureCollection',
                         features: []
                     };
 
-                    for (var i = 0; i < path.length - 1; i++) {
-                        var start = routeData.features[path[i].from()].geometry.coordinates;
-                        var end = routeData.features[path[i].to()].geometry.coordinates;
+                    if (closestLineStart && closestLineEnd) {
+                        // Create a new LineString for the route
+                        var routeCoordinates = [closestLineStart.geometry.coordinates, closestLineEnd.geometry.coordinates];
                         route.features.push({
                             type: 'Feature',
                             geometry: {
                                 type: 'LineString',
-                                coordinates: [start, end]
+                                coordinates: routeCoordinates
                             }
                         });
                     }
