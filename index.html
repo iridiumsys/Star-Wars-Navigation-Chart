@@ -245,15 +245,30 @@
         }
 
         function findRoute(routeData, start, end) {
-            // Extract coordinates from features
-            var coordinates = [];
-            routeData.features.forEach(function(feature) {
-                coordinates = coordinates.concat(feature.geometry.coordinates);
+            // Create a graph using route data
+            var graph = new jsgraphs.WeightedGraph(routeData.features.length);
+
+            routeData.features.forEach(function(feature, index) {
+                var coordinates = feature.geometry.coordinates;
+                var startNode = coordinates[0];
+                var endNode = coordinates[coordinates.length - 1];
+                
+                graph.addEdge(new jsgraphs.Edge(index, index + 1, turf.distance(turf.point(startNode), turf.point(endNode))));
             });
 
-            // Placeholder for actual routing algorithm
-            // Return a direct line for now
-            return [start.geometry.coordinates, end.geometry.coordinates];
+            // Implement Dijkstra's algorithm to find the shortest path
+            var dijkstra = new jsgraphs.Dijkstra(graph, 0);
+            var path = dijkstra.pathTo(1); // Example, you need to find the actual path
+
+            // Extract coordinates from path
+            var extractedPath = [];
+            path.forEach(function(edge) {
+                var routeFeature = routeData.features[edge.from()];
+                var coords = routeFeature.geometry.coordinates;
+                extractedPath = extractedPath.concat(coords);
+            });
+
+            return extractedPath;
         }
     </script>
 </body>
