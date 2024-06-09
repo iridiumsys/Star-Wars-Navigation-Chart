@@ -1,4 +1,4 @@
-<!-- Version 1.6 -->
+<!-- Version 1.7 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,9 +12,6 @@
 
     <!-- Turf.js -->
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
-
-    <!-- js-graph-algorithms (from jsDelivr CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/js-graph-algorithms@1.5.7"></script>
 
     <!-- Mapbox Directions Plugin -->
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.css" rel="stylesheet" />
@@ -245,14 +242,164 @@
                 });
         }
 
+        // Define necessary parts of js-graph-algorithms library
+        var jsgraphs = (function() {
+            function Edge(v, w, weight) {
+                this.v = v;
+                this.w = w;
+                this.weight = weight;
+            }
+
+            Edge.prototype.either = function() {
+                return this.v;
+            };
+
+            Edge.prototype.other = function(vertex) {
+                if (vertex === this.v) return this.w;
+                else if (vertex === this.w) return this.v;
+                else throw new Error('Inconsistent edge');
+            };
+
+            function Graph(V) {
+                this.V = V;
+                this.E = 0;
+                this.adj = [];
+                for (var v = 0; v < V; v++) {
+                    this.adj[v] = [];
+                }
+            }
+
+            Graph.prototype.addEdge = function(e) {
+                var v = e.either(), w = e.other(v);
+                this.adj[v].push(e);
+                this.adj[w].push(e);
+                this.E++;
+            };
+
+            function Dijkstra(G, s) {
+                this.edgeTo = [];
+                this.distTo = [];
+                this.pq = new MinPQ();
+
+                for (var v = 0; v < G.V; v++) {
+                    this.distTo[v] = Infinity;
+                }
+                this.distTo[s] = 0.0;
+
+                this.pq.insert(s, this.distTo[s]);
+                while (!this.pq.isEmpty()) {
+                    this.relax(G, this.pq.delMin());
+                }
+            }
+
+            Dijkstra.prototype.relax = function(G, v) {
+                G.adj[v].forEach(e => {
+                    var w = e.other(v);
+                    if (this.distTo[w] > this.distTo[v] + e.weight) {
+                        this.distTo[w] = this.distTo[v] + e.weight;
+                        this.edgeTo[w] = e;
+                        if (this.pq.contains(w)) {
+                            this.pq.decreaseKey(w, this.distTo[w]);
+                        } else {
+                            this.pq.insert(w, this.distTo[w]);
+                        }
+                    }
+                });
+            };
+
+            Dijkstra.prototype.hasPathTo = function(v) {
+                return this.distTo[v] < Infinity;
+            };
+
+            Dijkstra.prototype.pathTo = function(v) {
+                if (!this.hasPathTo(v)) return null;
+                var path = [];
+                for (var e = this.edgeTo[v]; e !== undefined; e = this.edgeTo[e.either()]) {
+                    path.push(e);
+                }
+                return path;
+            };
+
+            // Priority queue implementation
+            function MinPQ() {
+                this.pq = [];
+                this.keys = [];
+            }
+
+            MinPQ.prototype.isEmpty = function() {
+                return this.pq.length === 0;
+            };
+
+            MinPQ.prototype.insert = function(key, priority) {
+                this.pq.push({ key: key, priority: priority });
+                this.keys[key] = this.pq.length - 1;
+                this.swim(this.pq.length - 1);
+            };
+
+            MinPQ.prototype.delMin = function() {
+                var min = this.pq[0].key;
+                this.exch(0, this.pq.length - 1);
+                this.pq.pop();
+                this.sink(0);
+                delete this.keys[min];
+                return min;
+            };
+
+            MinPQ.prototype.contains = function(key) {
+                return this.keys[key] !== undefined;
+            };
+
+            MinPQ.prototype.decreaseKey = function(key, priority) {
+                var i = this.keys[key];
+                this.pq[i].priority = priority;
+                this.swim(i);
+            };
+
+            MinPQ.prototype.swim = function(k) {
+                while (k > 0 && this.greater(Math.floor((k - 1) / 2), k)) {
+                    this.exch(k, Math.floor((k - 1) / 2));
+                    k = Math.floor((k - 1) / 2);
+                }
+            };
+
+            MinPQ.prototype.sink = function(k) {
+                while (2 * k + 1 < this.pq.length) {
+                    var j = 2 * k + 1;
+                    if (j < this.pq.length - 1 && this.greater(j, j + 1)) j++;
+                    if (!this.greater(k, j)) break;
+                    this.exch(k, j);
+                    k = j;
+                }
+            };
+
+            MinPQ.prototype.greater = function(i, j) {
+                return this.pq[i].priority > this.pq[j].priority;
+            };
+
+            MinPQ.prototype.exch = function(i, j) {
+                var swap = this.pq[i];
+                this.pq[i] = this.pq[j];
+                this.pq[j] = swap;
+                this.keys[this.pq[i].key] = i;
+                this.keys[this.pq[j].key] = j;
+            };
+
+            return {
+                Edge: Edge,
+                Graph: Graph,
+                Dijkstra: Dijkstra,
+                MinPQ: MinPQ
+            };
+        })();
+
         function findRoute(routeData, start, end) {
-            var graph = new jsgraphs.WeightedGraph(routeData.features.length);
+            var graph = new jsgraphs.Graph(routeData.features.length);
 
             routeData.features.forEach((feature, index) => {
-                var coordinates = feature.geometry.coordinates;
-                for (var i = 0; i < coordinates.length - 1; i++) {
-                    var startNode = coordinates[i];
-                    var endNode = coordinates[i + 1];
+                if (feature.geometry.type === 'LineString') {
+                    var coordinates = feature.geometry.coordinates;
+                    var startNode = coordinates[0];
+                    var endNode = coordinates[coordinates.length - 1];
                     var weight = turf.distance(turf.point(startNode), turf.point(endNode));
 
                     var startIndex = index;
@@ -267,7 +414,7 @@
 
             if (dijkstra.hasPathTo(endNodeIndex)) {
                 var path = dijkstra.pathTo(endNodeIndex);
-                return path.map(edge => routeData.features[edge.from()].geometry.coordinates).flat();
+                return path.map(edge => routeData.features[edge.either()].geometry.coordinates).flat();
             } else {
                 console.error('No path found between the selected points.');
                 return null;
