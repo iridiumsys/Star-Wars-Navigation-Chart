@@ -200,23 +200,42 @@
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
-                    // Create Turf.js line segments from route GeoJSON
-                    var lineSegments = routeData.features.map(feature => {
-                        return feature.geometry.coordinates;
+                    // Create a graph from the routes data
+                    var graph = new jsgraphs.WeightedDiGraph(routeData.features.length);
+
+                    routeData.features.forEach((feature, index) => {
+                        var coordinates = feature.geometry.coordinates;
+                        for (var i = 0; i < coordinates.length - 1; i++) {
+                            var start = coordinates[i];
+                            var end = coordinates[i + 1];
+                            var weight = turf.distance(turf.point(start), turf.point(end));
+                            graph.addEdge(new jsgraphs.Edge(i, i + 1, weight));
+                        }
                     });
 
                     // Find the shortest path
-                    var shortestPath = turf.shortestPath(startPoint, endPoint, {
-                        units: 'kilometers',
-                        path: lineSegments
-                    });
+                    var dijkstra = new jsgraphs.Dijkstra(graph, 0);
+                    var path = dijkstra.pathTo(1); // Change to correct indices
 
-                    if (!shortestPath) {
-                        alert('No route found between the selected points.');
-                        return;
+                    // Create a feature collection for the route
+                    var route = {
+                        type: 'FeatureCollection',
+                        features: []
+                    };
+
+                    for (var i = 0; i < path.length - 1; i++) {
+                        var start = routeData.features[path[i].from()].geometry.coordinates;
+                        var end = routeData.features[path[i].to()].geometry.coordinates;
+                        route.features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: [start, end]
+                            }
+                        });
                     }
 
-                    map.getSource('route-line').setData(shortestPath);
+                    map.getSource('route-line').setData(route);
                 })
                 .catch(error => {
                     console.error('Error loading or processing route data:', error);
