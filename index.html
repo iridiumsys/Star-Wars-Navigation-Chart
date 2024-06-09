@@ -102,16 +102,21 @@
                         }
                     },
                     {
+                        id: 'route-line-halo-layer',
+                        type: 'line',
+                        source: 'route-line',
+                        paint: {
+                            'line-color': 'rgba(255, 127, 80, 0.5)', // Coral color with transparency for halo
+                            'line-width': 8
+                        }
+                    },
+                    {
                         id: 'route-line-layer',
                         type: 'line',
                         source: 'route-line',
                         paint: {
                             'line-color': '#FF7F50', // Coral color
-                            'line-width': 4,
-                            'line-opacity': 0.8,
-                            'line-blur': 1, // For halo effect
-                            'line-halo-color': '#FF7F50',
-                            'line-halo-width': 2
+                            'line-width': 4
                         }
                     }
                 ]
