@@ -59,6 +59,13 @@
                     'routes': {
                         type: 'geojson',
                         data: './layers/routes.geojson'
+                    },
+                    'route-line': {
+                        type: 'geojson',
+                        data: {
+                            type: 'FeatureCollection',
+                            features: []
+                        }
                     }
                 },
                 layers: [
@@ -94,15 +101,9 @@
                         }
                     },
                     {
-                        id: 'route-line',
+                        id: 'route-line-layer',
                         type: 'line',
-                        source: {
-                            type: 'geojson',
-                            data: {
-                                type: 'FeatureCollection',
-                                features: []
-                            }
-                        },
+                        source: 'route-line',
                         paint: {
                             'line-color': '#00f',
                             'line-width': 4
