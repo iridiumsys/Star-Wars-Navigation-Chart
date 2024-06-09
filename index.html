@@ -1,3 +1,4 @@
+<!-- Version 2 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -200,10 +201,17 @@
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
-                    // Find the shortest path using Turf.js
+                    // Create a feature collection to store the new route
+                    var route = {
+                        type: 'FeatureCollection',
+                        features: []
+                    };
+
+                    // Use Turf.js to find the shortest path between startPoint and endPoint along the routes
                     var start = turf.point(startPoint);
                     var end = turf.point(endPoint);
 
+                    // Find the closest points on the route to the start and end points
                     var closestStart = turf.nearestPointOnLine(routeData, start);
                     var closestEnd = turf.nearestPointOnLine(routeData, end);
 
@@ -211,29 +219,42 @@
                         throw new Error('No route found');
                     }
 
-                    var route = {
-                        type: 'FeatureCollection',
-                        features: []
-                    };
+                    // Find the actual route between closestStart and closestEnd
+                    var path = findRoute(routeData, closestStart, closestEnd);
 
-                    // Assume for now we connect the two points directly
-                    route.features.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: [
-                                closestStart.geometry.coordinates,
-                                closestEnd.geometry.coordinates
-                            ]
-                        }
-                    });
+                    if (path) {
+                        route.features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'LineString',
+                                coordinates: path
+                            }
+                        });
 
-                    map.getSource('route-line').setData(route);
+                        map.getSource('route-line').setData(route);
+                    } else {
+                        alert('No valid route found between the selected points.');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading or processing route data:', error);
                     alert('Error loading route data');
                 });
+        }
+
+        function findRoute(routeData, start, end) {
+            // This function finds the shortest path between start and end points on the routeData
+            // For now, it returns a direct line, but you can implement more complex logic here
+
+            // Extract coordinates from features
+            var coordinates = [];
+            routeData.features.forEach(function(feature) {
+                coordinates = coordinates.concat(feature.geometry.coordinates);
+            });
+
+            // Placeholder for actual routing algorithm
+            // Return a direct line for now
+            return [start.geometry.coordinates, end.geometry.coordinates];
         }
     </script>
 </body>
