@@ -1,4 +1,4 @@
-<!-- Version 1.2 -->
+<!-- Version 1.3 -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,6 +12,10 @@
 
     <!-- Turf.js -->
     <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+
+    <!-- Mapbox Directions Plugin -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.0/mapbox-gl-directions.js"></script>
 
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -206,7 +210,7 @@
                 return;
             }
 
-            // Load route GeoJSON data
+            // Use Turf.js to process the route data
             fetch('./layers/routes.geojson')
                 .then(response => response.json())
                 .then(routeData => {
