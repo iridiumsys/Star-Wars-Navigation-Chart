@@ -201,27 +201,32 @@
                 .then(response => response.json())
                 .then(routeData => {
                     // Find the shortest path using Turf.js
-                    var lineStrings = routeData.features.map(feature => feature.geometry.coordinates);
+                    var start = turf.point(startPoint);
+                    var end = turf.point(endPoint);
 
-                    var closestLineStart = turf.nearestPointOnLine(turf.lineString(lineStrings.flat()), turf.point(startPoint));
-                    var closestLineEnd = turf.nearestPointOnLine(turf.lineString(lineStrings.flat()), turf.point(endPoint));
+                    var closestStart = turf.nearestPointOnLine(routeData, start);
+                    var closestEnd = turf.nearestPointOnLine(routeData, end);
+
+                    if (!closestStart || !closestEnd) {
+                        throw new Error('No route found');
+                    }
 
                     var route = {
                         type: 'FeatureCollection',
                         features: []
                     };
 
-                    if (closestLineStart && closestLineEnd) {
-                        // Create a new LineString for the route
-                        var routeCoordinates = [closestLineStart.geometry.coordinates, closestLineEnd.geometry.coordinates];
-                        route.features.push({
-                            type: 'Feature',
-                            geometry: {
-                                type: 'LineString',
-                                coordinates: routeCoordinates
-                            }
-                        });
-                    }
+                    // Assume for now we connect the two points directly
+                    route.features.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: [
+                                closestStart.geometry.coordinates,
+                                closestEnd.geometry.coordinates
+                            ]
+                        }
+                    });
 
                     map.getSource('route-line').setData(route);
                 })
