@@ -37,394 +37,203 @@
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: {
-                version: 8,
-                sources: {
-                    'space-background': {
-                        type: 'raster',
-                        tiles: ['./XYZ_Space/{z}/{x}/{y}.png'],
-                        tileSize: 256,
-                        minzoom: 16,
-                        maxzoom: 22
-                    },
-                    'white-background': {
-                        type: 'raster',
-                        tiles: ['./XYZ/{z}/{x}/{y}.png'],
-                        tileSize: 256,
-                        minzoom: 16,
-                        maxzoom: 22
-                    },
-                    'systems': {
-                        type: 'geojson',
-                        data: './layers/systems.geojson'
-                    },
-                    'routes': {
-                        type: 'geojson',
-                        data: './layers/routes.geojson'
-                    },
-                    'route-line': {
-                        type: 'geojson',
-                        data: {
-                            type: 'FeatureCollection',
-                            features: []
-                        }
-                    }
-                },
-                layers: [
-                    {
-                        id: 'space-background',
-                        type: 'raster',
-                        source: 'space-background',
-                        layout: { visibility: 'visible' }
-                    },
-                    {
-                        id: 'white-background',
-                        type: 'raster',
-                        source: 'white-background',
-                        layout: { visibility: 'none' }
-                    },
-                    {
-                        id: 'systems',
-                        type: 'circle',
-                        source: 'systems',
-                        paint: {
-                            'circle-radius': 5,
-                            'circle-color': '#f00',
-                            'circle-opacity': 0 // Initially hidden
-                        }
-                    },
-                    {
-                        id: 'routes',
-                        type: 'line',
-                        source: 'routes',
-                        paint: {
-                            'line-color': '#000',
-                            'line-opacity': 0 // Initially hidden
-                        }
-                    },
-                    {
-                        id: 'route-line-halo-layer',
-                        type: 'line',
-                        source: 'route-line',
-                        paint: {
-                            'line-color': 'rgba(255, 127, 80, 0.5)', // Coral color with transparency for halo
-                            'line-width': 8
-                        }
-                    },
-                    {
-                        id: 'route-line-layer',
-                        type: 'line',
-                        source: 'route-line',
-                        paint: {
-                            'line-color': '#FF7F50', // Coral color
-                            'line-width': 4
-                        }
-                    }
-                ]
-            },
-            center: [0.00847486, -0.0109944],
-            zoom: 18
-        });
-
-        var allFeatures = [];
-
-        // Load all features from the systems.geojson
-        fetch('./layers/systems.geojson')
+        // Load the external layers list
+        fetch('./layers.json')
             .then(response => response.json())
-            .then(data => {
-                allFeatures = data.features;
+            .then(layers => initializeMap(layers))
+            .catch(error => console.error('Error loading layers:', error));
+
+        function initializeMap(layers) {
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    sources: layers.sources,
+                    layers: layers.layers
+                },
+                center: [0.00847486, -0.0109944],
+                zoom: 18
             });
 
-        // Toggle background functionality
-        var currentBackground = 'space-background';
+            var allFeatures = [];
 
-        document.getElementById('toggle-background').addEventListener('click', function() {
-            var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
-            map.setLayoutProperty(currentBackground, 'visibility', 'none');
-            map.setLayoutProperty(newBackground, 'visibility', 'visible');
-            currentBackground = newBackground;
-        });
+            // Load all features from the systems.geojson
+            fetch('./layers/systems.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    allFeatures = data.features;
+                });
 
-        // Search functionality
-        document.getElementById('search-button').addEventListener('click', function() {
-            const searchInput = document.getElementById('search-input').value.trim();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
+            // Toggle background functionality
+            var currentBackground = 'space-background';
 
-            const searchWords = searchInput.toLowerCase().split(' ');
+            document.getElementById('toggle-background').addEventListener('click', function() {
+                var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
+                map.setLayoutProperty(currentBackground, 'visibility', 'none');
+                map.setLayoutProperty(newBackground, 'visibility', 'visible');
+                currentBackground = newBackground;
+            });
 
-            let foundFeature = null;
-
-            for (const feature of allFeatures) {
-                const featureName = feature.properties.NAME;
-                if (!featureName) continue;
-                const nameWords = featureName.toLowerCase().split(' ');
-
-                const allWordsMatch = searchWords.every(searchWord =>
-                    nameWords.some(nameWord => nameWord.includes(searchWord))
-                );
-
-                if (allWordsMatch) {
-                    foundFeature = feature;
-                    break;
+            // Search functionality
+            document.getElementById('search-button').addEventListener('click', function() {
+                const searchInput = document.getElementById('search-input').value.trim();
+                if (!searchInput) {
+                    alert('Please enter a system name');
+                    return;
                 }
-            }
 
-            if (foundFeature) {
-                const coordinates = foundFeature.geometry.coordinates;
-                map.flyTo({ center: coordinates, zoom: 20 });
-            } else {
-                alert('System not found');
-                map.setZoom(18); // Reset zoom if not found
-            }
-        });
+                const searchWords = searchInput.toLowerCase().split(' ');
 
-        var startPoint, endPoint;
-        var routingActive = false;
+                let foundFeature = null;
 
-        document.getElementById('toggle-routing').addEventListener('click', function() {
-            routingActive = !routingActive;
-            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-            if (routingActive) {
-                map.once('click', function(event) {
-                    startPoint = [event.lngLat.lng, event.lngLat.lat];
-                    console.log('Start node:', startPoint);
+                for (const feature of allFeatures) {
+                    const featureName = feature.properties.NAME;
+                    if (!featureName) continue;
+                    const nameWords = featureName.toLowerCase().split(' ');
 
+                    const allWordsMatch = searchWords.every(searchWord =>
+                        nameWords.some(nameWord => nameWord.includes(searchWord))
+                    );
+
+                    if (allWordsMatch) {
+                        foundFeature = feature;
+                        break;
+                    }
+                }
+
+                if (foundFeature) {
+                    const coordinates = foundFeature.geometry.coordinates;
+                    map.flyTo({ center: coordinates, zoom: 20 });
+                } else {
+                    alert('System not found');
+                    map.setZoom(18); // Reset zoom if not found
+                }
+            });
+
+            var startPoint, endPoint;
+            var routingActive = false;
+
+            document.getElementById('toggle-routing').addEventListener('click', function() {
+                routingActive = !routingActive;
+                this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
+                if (routingActive) {
                     map.once('click', function(event) {
-                        endPoint = [event.lngLat.lng, event.lngLat.lat];
-                        console.log('End node:', endPoint);
-                        calculateAndDisplayRoute();
+                        startPoint = [event.lngLat.lng, event.lngLat.lat];
+                        console.log('Start node:', startPoint);
+
+                        map.once('click', function(event) {
+                            endPoint = [event.lngLat.lng, event.lngLat.lat];
+                            console.log('End node:', endPoint);
+                            calculateAndDisplayRoute();
+                        });
+                    });
+                }
+            });
+
+            function calculateAndDisplayRoute() {
+                if (!startPoint || !endPoint) {
+                    alert('Please select both start and end points.');
+                    return;
+                }
+
+                // Use Turf.js to process the route data
+                fetch('./layers/routes.geojson')
+                    .then(response => response.json())
+                    .then(routeData => {
+                        // Find the nearest points on the routes to startPoint and endPoint
+                        var nearestStart = turf.nearestPointOnLine(routeData, turf.point(startPoint));
+                        var nearestEnd = turf.nearestPointOnLine(routeData, turf.point(endPoint));
+
+                        // Find the actual route between nearestStart and nearestEnd points
+                        var path = findRoute(routeData, nearestStart, nearestEnd);
+
+                        if (path) {
+                            var route = {
+                                type: 'FeatureCollection',
+                                features: [{
+                                    type: 'Feature',
+                                    geometry: {
+                                        type: 'LineString',
+                                        coordinates: path
+                                    }
+                                }]
+                            };
+
+                            // Update the route-line source with the new route data
+                            map.getSource('route-line').setData(route);
+                        } else {
+                            console.error('No path found between the selected points.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading or processing route data:', error);
+                    });
+            }
+
+            function findRoute(routeData, nearestStart, nearestEnd) {
+                // Graph data structure for Dijkstra's algorithm
+                var graph = {};
+                routeData.features.forEach((feature, index) => {
+                    var coordinates = feature.geometry.coordinates;
+                    coordinates.forEach((coord, i) => {
+                        var key = coord.join(',');
+                        if (!graph[key]) {
+                            graph[key] = {};
+                        }
+                        if (i > 0) {
+                            var prevKey = coordinates[i - 1].join(',');
+                            graph[key][prevKey] = turf.distance(turf.point(coord), turf.point(coordinates[i - 1]));
+                            graph[prevKey][key] = graph[key][prevKey];
+                        }
                     });
                 });
-            }
-        });
 
-        function calculateAndDisplayRoute() {
-            if (!startPoint || !endPoint) {
-                alert('Please select both start and end points.');
-                return;
-            }
+                // Dijkstra's algorithm implementation
+                function dijkstra(graph, start, end) {
+                    var distances = {};
+                    var parents = {};
+                    var visited = new Set();
 
-            // Use Turf.js to process the route data
-            fetch('./layers/routes.geojson')
-                .then(response => response.json())
-                .then(routeData => {
-                    // Use Turf.js to find the nearest points on the routes to startPoint and endPoint
-                    var start = turf.point(startPoint);
-                    var end = turf.point(endPoint);
-
-                    var nearestStart = turf.nearestPointOnLine(routeData, start);
-                    var nearestEnd = turf.nearestPointOnLine(routeData, end);
-
-                    // Find the actual route between nearestStart and nearestEnd points
-                    var path = findRoute(routeData, nearestStart, nearestEnd);
-
-                    if (path) {
-                        var route = {
-                            type: 'FeatureCollection',
-                            features: [{
-                                type: 'Feature',
-                                geometry: {
-                                    type: 'LineString',
-                                    coordinates: path
-                                }
-                            }]
-                        };
-
-                        // Update the route-line source with the new route data
-                        map.getSource('route-line').setData(route);
-                    } else {
-                        console.error('No path found between the selected points.');
+                    for (var node in graph) {
+                        distances[node] = Infinity;
+                        parents[node] = null;
                     }
-                })
-                .catch(error => {
-                    console.error('Error loading or processing route data:', error);
-                });
-        }
+                    distances[start] = 0;
 
-        // Define necessary parts of js-graph-algorithms within this script
-        var jsgraphs = (function() {
-            function Edge(v, w, weight) {
-                this.v = v;
-                this.w = w;
-                this.weight = weight;
-            }
+                    while (Object.keys(visited).length !== Object.keys(graph).length) {
+                        var closestNode = null;
+                        for (var node in distances) {
+                            if (!visited.has(node)) {
+                                if (closestNode === null || distances[node] < distances[closestNode]) {
+                                    closestNode = node;
+                                }
+                            }
+                        }
+                        if (closestNode === null) break;
+                        visited.add(closestNode);
 
-            Edge.prototype.either = function() {
-                return this.v;
-            };
-
-            Edge.prototype.other = function(v) {
-                if (v === this.v) return this.w;
-                else if (v === this.w) return this.v;
-                else throw new Error('Inconsistent edge');
-            };
-
-            Edge.prototype.compareTo = function(that) {
-                if (this.weight < that.weight) return -1;
-                if (this.weight > that.weight) return 1;
-                return 0;
-            };
-
-            function Graph(V) {
-                this.V = V;
-                this.E = 0;
-                this.adj = [];
-                for (var v = 0; v < V; v++) {
-                    this.adj[v] = [];
-                }
-            }
-
-            Graph.prototype.addEdge = function(e) {
-                var v = e.either(), w = e.other(v);
-                this.adj[v].push(e);
-                this.adj[w].push(e);
-                this.E++;
-            };
-
-            function Dijkstra(G, s) {
-                this.edgeTo = [];
-                this.distTo = [];
-                this.pq = new MinPQ();
-
-                for (var v = 0; v < G.V; v++) {
-                    this.distTo[v] = Infinity;
-                }
-                this.distTo[s] = 0.0;
-
-                this.pq.insert(s, this.distTo[s]);
-                while (!this.pq.isEmpty()) {
-                    this.relax(G, this.pq.delMin());
-                }
-            }
-
-            Dijkstra.prototype.relax = function(G, v) {
-                G.adj[v].forEach(e => {
-                    var w = e.other(v);
-                    if (this.distTo[w] > this.distTo[v] + e.weight) {
-                        this.distTo[w] = this.distTo[v] + e.weight;
-                        this.edgeTo[w] = e;
-                        if (this.pq.contains(w)) {
-                            this.pq.decreaseKey(w, this.distTo[w]);
-                        } else {
-                            this.pq.insert(w, this.distTo[w]);
+                        for (var neighbor in graph[closestNode]) {
+                            var newDist = distances[closestNode] + graph[closestNode][neighbor];
+                            if (newDist < distances[neighbor]) {
+                                distances[neighbor] = newDist;
+                                parents[neighbor] = closestNode;
+                            }
                         }
                     }
-                });
-            };
 
-            Dijkstra.prototype.hasPathTo = function(v) {
-                return this.distTo[v] < Infinity;
-            };
-
-            Dijkstra.prototype.pathTo = function(v) {
-                if (!this.hasPathTo(v)) return null;
-                var path = [];
-                for (var e = this.edgeTo[v]; e !== undefined; e = this.edgeTo[e.either()]) {
-                    path.push(e);
+                    var path = [];
+                    var currentNode = end;
+                    while (currentNode !== null) {
+                        path.push(currentNode.split(',').map(Number));
+                        currentNode = parents[currentNode];
+                    }
+                    path.reverse();
+                    return path;
                 }
-                return path;
-            };
 
-            function MinPQ() {
-                this.pq = [];
-                this.keys = [];
-            }
-
-            MinPQ.prototype.isEmpty = function() {
-                return this.pq.length === 0;
-            };
-
-            MinPQ.prototype.insert = function(key, priority) {
-                this.pq.push({ key: key, priority: priority });
-                this.keys[key] = this.pq.length - 1;
-                this.swim(this.pq.length - 1);
-            };
-
-            MinPQ.prototype.delMin = function() {
-                var min = this.pq[0].key;
-                this.exch(0, this.pq.length - 1);
-                this.pq.pop();
-                this.sink(0);
-                delete this.keys[min];
-                return min;
-            };
-
-            MinPQ.prototype.contains = function(key) {
-                return this.keys[key] !== undefined;
-            };
-
-            MinPQ.prototype.decreaseKey = function(key, priority) {
-                var i = this.keys[key];
-                this.pq[i].priority = priority;
-                this.swim(i);
-            };
-
-            MinPQ.prototype.swim = function(k) {
-                while (k > 0 && this.greater(Math.floor((k - 1) / 2), k)) {
-                    this.exch(k, Math.floor((k - 1) / 2));
-                    k = Math.floor((k - 1) / 2);
-                }
-            };
-
-            MinPQ.prototype.sink = function(k) {
-                while (2 * k + 1 < this.pq.length) {
-                    var j = 2 * k + 1;
-                    if (j < this.pq.length - 1 && this.greater(j, j + 1)) j++;
-                    if (!this.greater(k, j)) break;
-                    this.exch(k, j);
-                    k = j;
-                }
-            };
-
-            MinPQ.prototype.greater = function(i, j) {
-                return this.pq[i].priority > this.pq[j].priority;
-            };
-
-            MinPQ.prototype.exch = function(i, j) {
-                var swap = this.pq[i];
-                this.pq[i] = this.pq[j];
-                this.pq[j] = swap;
-                this.keys[this.pq[i].key] = i;
-                this.keys[this.pq[j].key] = j;
-            };
-
-            return {
-                Edge: Edge,
-                Graph: Graph,
-                Dijkstra: Dijkstra,
-                MinPQ: MinPQ
-            };
-        })();
-
-        function findRoute(routeData, start, end) {
-            var graph = new jsgraphs.Graph(routeData.features.length);
-
-            routeData.features.forEach((feature, index) => {
-                if (feature.geometry.type === 'LineString') {
-                    var coordinates = feature.geometry.coordinates;
-                    var startNode = coordinates[0];
-                    var endNode = coordinates[coordinates.length - 1];
-                    var weight = turf.distance(turf.point(startNode), turf.point(endNode));
-
-                    graph.addEdge(new jsgraphs.Edge(index, index + 1, weight));
-                }
-            });
-
-            var startNodeIndex = 0; // Assume start node index is 0
-            var endNodeIndex = routeData.features.length - 1; // Assume end node index is the last feature index
-            var dijkstra = new jsgraphs.Dijkstra(graph, startNodeIndex);
-
-            if (dijkstra.hasPathTo(endNodeIndex)) {
-                var path = dijkstra.pathTo(endNodeIndex);
-                return path.map(edge => routeData.features[edge.either()].geometry.coordinates).flat();
-            } else {
-                console.error('No path found between the selected points.');
-                return null;
+                var startKey = nearestStart.geometry.coordinates.join(',');
+                var endKey = nearestEnd.geometry.coordinates.join(',');
+                return dijkstra(graph, startKey, endKey);
             }
         }
     </script>
