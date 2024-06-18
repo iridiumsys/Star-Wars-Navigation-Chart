@@ -37,21 +37,22 @@
     </div>
 
     <script>
-        // Initialize map and layers
-        var map = new ol.Map({
+        // Map initialization
+        const map = new ol.Map({
             target: 'map',
             view: new ol.View({
                 center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
                 zoom: 18,
-            })
+            }),
         });
 
-        var backgroundLayers = [
+        // Background layers
+        const backgroundLayers = [
             new ol.layer.Tile({
                 source: new ol.source.XYZ({
                     url: './XYZ_Space/{z}/{x}/{y}.png',
                     minZoom: 16,
-                    maxZoom: 22
+                    maxZoom: 22,
                 }),
                 attribution: 'Space Background',
             }),
@@ -59,21 +60,42 @@
                 source: new ol.source.XYZ({
                     url: './XYZ/{z}/{x}/{y}.png',
                     minZoom: 16,
-                    maxZoom: 22
+                    maxZoom: 22,
                 }),
                 attribution: 'White Background',
-            })
+            }),
         ];
 
-        var currentBackgroundIndex = 0;
+        let currentBackgroundIndex = 0;
         map.addLayer(backgroundLayers[currentBackgroundIndex]);
 
-        document.getElementById('toggle-background').addEventListener('click', function() {
+        document.getElementById('toggle-background').addEventListener('click', () => {
             currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
             map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
         });
 
-        // Search functionality
+        // Systems Layer
+        const systemsSource = new ol.source.Vector({
+            url: './layers/systems.geojson',
+            format: new ol.format.GeoJSON(),
+        });
+
+        const transparentStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 0.5,
+                fill: new ol.style.Fill({ color: 'rgba(0, 0, 0, 0)' }),
+                stroke: new ol.style.Stroke({ color: 'rgba(0, 0, 0, 0)' }),
+            }),
+        });
+
+        const systemsLayer = new ol.layer.Vector({
+            source: systemsSource,
+            style: transparentStyle,
+        });
+
+        map.addLayer(systemsLayer);
+
+        // Search Functionality
         function handleSearch() {
             const searchInput = document.getElementById('search-input').value.trim();
             if (!searchInput) {
@@ -81,19 +103,17 @@
                 return;
             }
 
-            const searchWords = searchInput.toLowerCase().split(' '); // Split input into words
+            const searchWords = searchInput.toLowerCase().split(' ');
             const vectorSource = systemsLayer.getSource();
             const features = vectorSource.getFeatures();
 
             let foundFeature = null;
 
-            for (let i = 0; i < features.length; i++) {
-                const feature = features[i];
+            for (const feature of features) {
                 const featureName = feature.get('NAME');
-                if (!featureName) continue; // Skip if feature doesn't have a NAME property
+                if (!featureName) continue;
                 const nameWords = featureName.toLowerCase().split(' ');
 
-                // Check if any search word is a substring of any of the name words
                 const allWordsMatch = searchWords.every(searchWord =>
                     nameWords.some(nameWord => nameWord.includes(searchWord))
                 );
@@ -114,82 +134,59 @@
                     map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
                 } else {
                     const center = ol.extent.getCenter(extent);
-                    map.getView().animate({ center: center, duration: 1000, zoom: 20 });
+                    map.getView().animate({ center, duration: 1000, zoom: 20 });
                 }
             } else {
                 alert('System not found');
-                map.getView().setZoom(18); // Reset zoom if not found
+                map.getView().setZoom(18);
             }
         }
 
         document.getElementById('search-button').addEventListener('click', handleSearch);
 
-        var systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
-        });
-
-        var transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 0)'
-                })
-            })
-        });
-
-        var systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle
-        });
-
-        map.addLayer(systemsLayer);
-
-        // Routing functionality
-        var routeLayer = new ol.layer.Vector({
+        // Routing Functionality
+        const routeLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 url: './layers/routes.geojson',
-                format: new ol.format.GeoJSON()
+                format: new ol.format.GeoJSON(),
             }),
-            style: transparentStyle
+            style: transparentStyle,
         });
 
         map.addLayer(routeLayer);
 
-        var routeFeatureOverlay = new ol.layer.Vector({
+        const routeFeatureOverlay = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
                 stroke: new ol.style.Stroke({
                     color: 'blue',
-                    width: 2
+                    width: 2,
                 }),
                 text: new ol.style.Text({
                     font: '12px Calibri,sans-serif',
                     fill: new ol.style.Fill({ color: 'black' }),
                     stroke: new ol.style.Stroke({
-                        color: 'white', width: 3
-                    })
-                })
-            })
+                        color: 'white',
+                        width: 3,
+                    }),
+                }),
+            }),
         });
 
         map.addLayer(routeFeatureOverlay);
 
-        var startPoint, endPoint;
-        var routingActive = false;
+        let startPoint, endPoint;
+        let routingActive = false;
 
-        document.getElementById('toggle-routing').addEventListener('click', function() {
+        document.getElementById('toggle-routing').addEventListener('click', () => {
             routingActive = !routingActive;
             this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
             if (routingActive) {
-                map.once('click', function(event) {
+                map.once('click', event => {
                     startPoint = event.coordinate;
                     console.log('Start node:', startPoint);
 
-                    map.once('click', function(event) {
+                    map.once('click', event => {
                         endPoint = event.coordinate;
                         console.log('End node:', endPoint);
                         calculateAndDisplayRoute();
@@ -204,32 +201,29 @@
                 return;
             }
 
-            // Convert coordinates to projections
-            var startProj = ol.proj.toLonLat(startPoint);
-            var endProj = ol.proj.toLonLat(endPoint);
+            const startProj = ol.proj.toLonLat(startPoint);
+            const endProj = ol.proj.toLonLat(endPoint);
 
-            // Build the graph from the geojson data
-            var graph = new graphlib.Graph();
+            const graph = new graphlib.Graph();
 
-            routeLayer.getSource().forEachFeature(function(feature) {
-                var geometry = feature.getGeometry();
-                var coordinates = geometry.getCoordinates();
+            routeLayer.getSource().forEachFeature(feature => {
+                const geometry = feature.getGeometry();
+                const coordinates = geometry.getCoordinates();
 
-                for (var i = 0; i < coordinates.length - 1; i++) {
-                    var start = ol.proj.toLonLat(coordinates[i]);
-                    var end = ol.proj.toLonLat(coordinates[i + 1]);
-                    var distance = ol.sphere.getDistance(start, end);
+                for (let i = 0; i < coordinates.length - 1; i++) {
+                    const start = ol.proj.toLonLat(coordinates[i]);
+                    const end = ol.proj.toLonLat(coordinates[i + 1]);
+                    const distance = ol.sphere.getDistance(start, end);
 
                     graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
                     graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
                 }
             });
 
-            // Perform Dijkstra's algorithm
-            var dijkstra = graphlib.alg.dijkstra(graph, JSON.stringify(startProj));
-            var path = [];
+            const dijkstra = graphlib.alg.dijkstra(graph, JSON.stringify(startProj));
+            const path = [];
 
-            var currNode = JSON.stringify(endProj);
+            let currNode = JSON.stringify(endProj);
             while (currNode !== JSON.stringify(startProj)) {
                 path.push(JSON.parse(currNode));
                 if (dijkstra[currNode] && dijkstra[currNode].predecessor) {
@@ -242,9 +236,8 @@
             path.push(startProj);
             path.reverse();
 
-            // Display the route on the map
-            var routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat))
+            const routeFeature = new ol.Feature({
+                geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat)),
             });
 
             routeFeatureOverlay.getSource().clear();
