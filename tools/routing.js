@@ -1,3 +1,66 @@
+// Simple Dijkstra implementation
+function dijkstra(graph, source) {
+    const distances = {};
+    const previous = {};
+    const queue = [];
+
+    for (let vertex in graph.nodes) {
+        if (graph.nodes.hasOwnProperty(vertex)) {
+            distances[vertex] = Infinity;
+            previous[vertex] = null;
+            queue.push(vertex);
+        }
+    }
+    distances[source] = 0;
+
+    while (queue.length > 0) {
+        queue.sort((a, b) => distances[a] - distances[b]);
+        const u = queue.shift();
+
+        for (let neighbor in graph.edges[u]) {
+            if (graph.edges[u].hasOwnProperty(neighbor)) {
+                const alt = distances[u] + graph.edges[u][neighbor];
+                if (alt < distances[neighbor]) {
+                    distances[neighbor] = alt;
+                    previous[neighbor] = u;
+                }
+            }
+        }
+    }
+
+    return { distances, previous };
+}
+
+function getPath(previous, target) {
+    const path = [];
+    let currentNode = target;
+
+    while (currentNode !== null) {
+        path.unshift(currentNode);
+        currentNode = previous[currentNode];
+    }
+
+    return path;
+}
+
+// Graph data structure
+class Graph {
+    constructor() {
+        this.nodes = {};
+        this.edges = {};
+    }
+
+    addNode(node) {
+        this.nodes[node] = node;
+        this.edges[node] = {};
+    }
+
+    addEdge(start, end, weight) {
+        this.edges[start][end] = weight;
+        this.edges[end][start] = weight; // Assuming undirected graph
+    }
+}
+
 // Routing functionality
 const routeLayer = new ol.layer.Vector({
     source: new ol.source.Vector({
@@ -58,7 +121,7 @@ function calculateAndDisplayRoute() {
     const startProj = ol.proj.toLonLat(startPoint);
     const endProj = ol.proj.toLonLat(endPoint);
 
-    const graph = new graphlib.Graph();
+    const graph = new Graph();
 
     routeLayer.getSource().forEachFeature(feature => {
         const geometry = feature.getGeometry();
@@ -69,31 +132,23 @@ function calculateAndDisplayRoute() {
             const end = ol.proj.toLonLat(coordinates[i + 1]);
             const distance = ol.sphere.getDistance(start, end);
 
-            graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
-            graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
+            graph.addNode(JSON.stringify(start));
+            graph.addNode(JSON.stringify(end));
+            graph.addEdge(JSON.stringify(start), JSON.stringify(end), distance);
         }
     });
 
-    console.log('Graph nodes:', graph.nodes());
-    console.log('Graph edges:', graph.edges());
+    console.log('Graph nodes:', Object.keys(graph.nodes));
+    console.log('Graph edges:', graph.edges);
 
-    const dijkstra = graphlib.alg.dijkstra(graph, JSON.stringify(startProj));
+    const { distances, previous } = dijkstra(graph, JSON.stringify(startProj));
 
-    if (!dijkstra[JSON.stringify(endProj)]) {
+    if (!distances[JSON.stringify(endProj)] || distances[JSON.stringify(endProj)] === Infinity) {
         alert('No route found between the selected points.');
         return;
     }
 
-    const path = [];
-    let currNode = JSON.stringify(endProj);
-    while (currNode !== JSON.stringify(startProj)) {
-        if (!dijkstra[currNode] || !dijkstra[currNode].predecessor) {
-            alert('No route found between the selected points.');
-            return;
-        }
-        path.push(JSON.parse(currNode));
-        currNode = dijkstra[currNode].predecessor;
-    }
+    const path = getPath(previous, JSON.stringify(endProj)).map(coord => JSON.parse(coord));
     path.push(startProj);
     path.reverse();
 
