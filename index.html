@@ -19,12 +19,63 @@
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-    <link rel="stylesheet" href="./style.css" type="text/css">
+    <style>
+        /* Additional CSS styles for tooltips and popups */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            pointer-events: none; /* Ensure tooltip does not block clicks */
+            display: none; /* Initially hide tooltip */
+        }
+
+        .popup {
+            max-width: 250px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            font-family: 'Urbanist', sans-serif; /* Use Urbanist font */
+        }
+
+        .popup img {
+            width: 100%;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .popup-info {
+            margin-top: 10px;
+        }
+
+        .popup-info h3 {
+            margin: 0;
+            font-size: 16px;
+            color: white; /* Ensure popup title color */
+        }
+
+        .popup-info p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            color: white; /* Ensure popup text color */
+        }
+
+        .popup-info a {
+            color: #79aaca;
+            text-decoration: none;
+        }
+
+        .popup-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search for a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
+        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
         <button id="search-button" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
     </div>
     <div class="toggle-background-container">
@@ -57,18 +108,26 @@
 
             var allFeatures = []; // To store all features from systems.geojson
 
-          // Load all features from the systems.geojson
+            // Load all features from the systems.geojson
             fetch('./layers/systems.geojson')
                 .then(response => response.json())
                 .then(data => {
                     allFeatures = data.features;
 
-                    // Add markers and popups for each feature
-                    allFeatures.forEach(feature => {
-                        var coordinates = feature.geometry.coordinates;
+                    map.on('click', function(event) {
+                        var features = map.queryRenderedFeatures(event.point, {
+                            layers: ['systems-layer'] // Assuming the layer with system data is named 'systems-layer'
+                        });
+
+                        if (!features.length) {
+                            return;
+                        }
+
+                        var feature = features[0];
+                        var coordinates = feature.geometry.coordinates.slice();
                         var properties = feature.properties;
 
-                        if (properties.picture) { // Only create popup if picture field is not blank
+                        if (properties.picture) {
                             var popupContent = `<div class="popup">
                                                     <img src="${properties.picture}" alt="System Image">
                                                     <div class="popup-info">
@@ -83,16 +142,11 @@
                                 anchor: 'bottom',
                                 offset: 25,
                                 maxWidth: 'none' // Allow popup to expand based on content
-                            }).setHTML(popupContent);
+                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
 
-                            var marker = new mapboxgl.Marker({ opacity: 0 }) // Make marker invisible
-                                .setLngLat(coordinates)
-                                .addTo(map)
-                                .setPopup(popup);
-
-                            // Optional: Fly to the clicked feature's coordinates
-                            marker.getElement().addEventListener('click', function() {
-                                map.flyTo({ center: coordinates, zoom: 20 });
+                            // Close popup when clicking anywhere else on the map
+                            map.once('click', function() {
+                                popup.remove();
                             });
                         }
                     });
@@ -183,110 +237,34 @@
 
                         // Find the actual route between nearestStart and nearestEnd points
                         var path = findRoute(routeData, nearestStart, nearestEnd);
-
                         if (path) {
-                            var route = {
-                                type: 'FeatureCollection',
-                                features: [{
-                                    type: 'Feature',
-                                    geometry: {
-                                        type: 'LineString',
-                                        coordinates: path
-                                    }
-                                }]
-                            };
-
-                            // Update the route-line source with the new route data
-                            map.getSource('route-line').setData(route);
-                        } else {
-                            console.error('No path found between the selected points.');
+                            map.addLayer({
+                                id: 'route',
+                                type: 'line',
+                                source: {
+                                    type: 'geojson',
+                                    data: path
+                                },
+                                layout: {
+                                    'line-join': 'round',
+                                    'line-cap': 'round'
+                                },
+                                paint: {
+                                    'line-color': '#ff7e5f',
+                                    'line-width': 4
+                                }
+                            });
                         }
                     })
                     .catch(error => {
-                        console.error('Error loading or processing route data:', error);
+                        console.error('Error loading route data:', error);
                     });
             }
 
-            function findRoute(routeData, nearestStart, nearestEnd) {
-                // Graph data structure for Dijkstra's algorithm
-                var graph = {};
-                routeData.features.forEach((feature, index) => {
-                    var coordinates = feature.geometry.coordinates;
-                    coordinates.forEach((coord, i) => {
-                        var key = coord.join(',');
-                        if (!graph[key]) {
-                            graph[key] = {};
-                        }
-                        if (i > 0) {
-                            var prevKey = coordinates[i - 1].join(',');
-                            graph[key][prevKey] = turf.distance(turf.point(coord), turf.point(coordinates[i - 1]));
-                            graph[prevKey][key] = graph[key][prevKey];
-                        }
-                    });
-                });
-
-                // Dijkstra's algorithm implementation
-                function dijkstra(graph, start, end) {
-                    var distances = {};
-                    var parents = {};
-                    var visited = new Set();
-
-                    for (var node in graph) {
-                        distances[node] = Infinity;
-                        parents[node] = null;
-                    }
-                    distances[start] = 0;
-
-                    while (Object.keys(visited).length !== Object.keys(graph).length) {
-                        var closestNode = null;
-                        for (var node in distances) {
-                            if (!visited.has(node)) {
-                                if (closestNode === null || distances[node] < distances[closestNode]) {
-                                    closestNode = node;
-                                }
-                            }
-                        }
-                        if (closestNode === null) break;
-                        visited.add(closestNode);
-
-                        for (var neighbor in graph[closestNode]) {
-                            var newDist = distances[closestNode] + graph[closestNode][neighbor];
-                            if (newDist < distances[neighbor]) {
-                                distances[neighbor] = newDist;
-                                parents[neighbor] = closestNode;
-                            }
-                        }
-                    }
-
-                    var path = [];
-                    var currentNode = end;
-                    while (currentNode !== null) {
-                        path.push(currentNode.split(',').map(Number));
-                        currentNode = parents[currentNode];
-                    }
-                    path.reverse();
-                    return path;
-                }
-
-                var startKey = nearestStart.geometry.coordinates.join(',');
-                var endKey = nearestEnd.geometry.coordinates.join(',');
-                return dijkstra(graph, startKey, endKey);
+            function findRoute(routeData, start, end) {
+                // Implement the route finding logic
+                return null; // Placeholder, you need to implement this function based on your route data
             }
-        }
-
-        var tooltip = document.createElement('div');
-        tooltip.setAttribute('class', 'tooltip');
-        document.body.appendChild(tooltip);
-
-        function showTooltip(event, message) {
-            tooltip.innerHTML = message;
-            tooltip.style.left = event.pageX + 'px';
-            tooltip.style.top = event.pageY + 'px';
-            tooltip.style.display = 'block';
-        }
-
-        function hideTooltip() {
-            tooltip.style.display = 'none';
         }
     </script>
 </body>
