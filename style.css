@@ -133,3 +133,18 @@
             display: none;
             pointer-events: none; /* Ensure tooltip doesn't interfere with mouse events of underlying elements */
         }
+
+        .popup {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            max-width: 300px;
+        }
+
+        .popup img {
+            width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
