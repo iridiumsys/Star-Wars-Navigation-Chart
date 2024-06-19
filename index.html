@@ -57,7 +57,7 @@
 
             var allFeatures = []; // To store all features from systems.geojson
 
-            // Load all features from the systems.geojson
+          // Load all features from the systems.geojson
             fetch('./layers/systems.geojson')
                 .then(response => response.json())
                 .then(data => {
@@ -68,30 +68,33 @@
                         var coordinates = feature.geometry.coordinates;
                         var properties = feature.properties;
 
-                        var popupContent = `<div class="popup">
-                                                <img src="${properties.picture}" alt="System Image">
-                                                <div class="popup-info">
-                                                    <h3>${properties.NAME}</h3>
-                                                    <p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>
-                                                </div>
-                                            </div>`;
+                        if (properties.picture) { // Only create popup if picture field is not blank
+                            var popupContent = `<div class="popup">
+                                                    <img src="${properties.picture}" alt="System Image">
+                                                    <div class="popup-info">
+                                                        <h3>${properties.NAME}</h3>
+                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                                    </div>
+                                                </div>`;
 
-                        var popup = new mapboxgl.Popup({
-                            closeButton: true,
-                            closeOnClick: false,
-                            anchor: 'bottom',
-                            offset: 25
-                        }).setHTML(popupContent);
+                            var popup = new mapboxgl.Popup({
+                                closeButton: true,
+                                closeOnClick: false,
+                                anchor: 'bottom',
+                                offset: 25,
+                                maxWidth: 'none' // Allow popup to expand based on content
+                            }).setHTML(popupContent);
 
-                        var marker = new mapboxgl.Marker()
-                            .setLngLat(coordinates)
-                            .addTo(map)
-                            .setPopup(popup);
+                            var marker = new mapboxgl.Marker({ opacity: 0 }) // Make marker invisible
+                                .setLngLat(coordinates)
+                                .addTo(map)
+                                .setPopup(popup);
 
-                        // Optional: Fly to the clicked feature's coordinates
-                        marker.getElement().addEventListener('click', function() {
-                            map.flyTo({ center: coordinates, zoom: 20 });
-                        });
+                            // Optional: Fly to the clicked feature's coordinates
+                            marker.getElement().addEventListener('click', function() {
+                                map.flyTo({ center: coordinates, zoom: 20 });
+                            });
+                        }
                     });
                 })
                 .catch(error => {
