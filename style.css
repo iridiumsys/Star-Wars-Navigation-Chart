@@ -120,3 +120,16 @@
         .routing-container button:hover {
             background: #79aaca;
         }
+
+        .tooltip {
+            position: absolute;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            font-family: 'Urbanist', sans-serif;
+            font-size: 14px;
+            display: none;
+            pointer-events: none; /* Ensure tooltip doesn't interfere with mouse events of underlying elements */
+        }
