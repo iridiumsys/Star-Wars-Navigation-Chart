@@ -39,7 +39,7 @@
     <script type="text/javascript" src="./tools/routing.js"></script>
     <script>
         // Load layers configuration
-        fetch('./layers.json')
+        fetch('.layers/layers.json')
             .then(response => response.json())
             .then(layersConfig => {
                 const map = new ol.Map({
