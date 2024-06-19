@@ -14,6 +14,10 @@
     <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
     <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
 
+    <!-- Graphlib and Graphlib-Dijkstra -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.9/graphlib.min.js"></script>
+    <script src="https://unpkg.com/graphlib-dijkstra@2.0.1/dist/graphlib-dijkstra.min.js"></script>
+
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -32,114 +36,120 @@
         <button id="toggle-routing"><i class="fas fa-route"></i></button>
     </div>
 
+    <script type="text/javascript" src="./tools/routing.js"></script>
     <script>
-        // Map initialization
-        const map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            }),
-        });
+        // Load layers configuration
+        fetch('./layers.json')
+            .then(response => response.json())
+            .then(layersConfig => {
+                const map = new ol.Map({
+                    target: 'map',
+                    view: new ol.View({
+                        center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
+                        zoom: 18,
+                    }),
+                });
 
-        // Background layers
-        const backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }),
-                attribution: 'Space Background',
-            }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }),
-                attribution: 'White Background',
-            }),
-        ];
+                // Add layers from configuration
+                const layers = layersConfig.layers.map(layerConfig => {
+                    if (layerConfig.type === 'raster') {
+                        return new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: layerConfig.source.tiles[0],
+                                minZoom: layerConfig.source.minzoom,
+                                maxZoom: layerConfig.source.maxzoom,
+                            }),
+                            visible: layerConfig.layout.visibility === 'visible',
+                        });
+                    } else if (layerConfig.type === 'circle' || layerConfig.type === 'line') {
+                        return new ol.layer.Vector({
+                            source: new ol.source.Vector({
+                                url: layersConfig.sources[layerConfig.source].data,
+                                format: new ol.format.GeoJSON(),
+                            }),
+                            style: new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: layerConfig.paint['circle-radius'] || 5,
+                                    fill: new ol.style.Fill({
+                                        color: layerConfig.paint['circle-color'] || '#f00'
+                                    }),
+                                    stroke: new ol.style.Stroke({
+                                        color: 'rgba(0, 0, 0, 0)'
+                                    })
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: layerConfig.paint['line-color'] || '#000',
+                                    width: 2
+                                })
+                            })
+                        });
+                    }
+                });
 
-        let currentBackgroundIndex = 0;
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+                layers.forEach(layer => map.addLayer(layer));
 
-        document.getElementById('toggle-background').addEventListener('click', () => {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
-        });
+                const systemsLayer = layers.find(layer => layer.getSource().getUrl() === './layers/systems.geojson');
+                const routeLayer = layers.find(layer => layer.getSource().getUrl() === './layers/routes.geojson');
 
-        // Systems Layer
-        const systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
-        });
+                // Handle search functionality
+                document.getElementById('search-button').addEventListener('click', () => {
+                    const searchInput = document.getElementById('search-input').value.trim();
+                    if (!searchInput) {
+                        alert('Please enter a system name');
+                        return;
+                    }
 
-        const transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({ color: 'rgba(0, 0, 0, 0)' }),
-                stroke: new ol.style.Stroke({ color: 'rgba(0, 0, 0, 0)' }),
-            }),
-        });
+                    const searchWords = searchInput.toLowerCase().split(' ');
+                    const vectorSource = systemsLayer.getSource();
+                    const features = vectorSource.getFeatures();
 
-        const systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle,
-        });
+                    let foundFeature = null;
 
-        map.addLayer(systemsLayer);
+                    for (const feature of features) {
+                        const featureName = feature.get('NAME');
+                        if (!featureName) continue;
+                        const nameWords = featureName.toLowerCase().split(' ');
 
-        // Search Functionality
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value.trim();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
+                        const allWordsMatch = searchWords.every(searchWord =>
+                            nameWords.some(nameWord => nameWord.includes(searchWord))
+                        );
 
-            const searchWords = searchInput.toLowerCase().split(' ');
-            const vectorSource = systemsLayer.getSource();
-            const features = vectorSource.getFeatures();
+                        if (allWordsMatch) {
+                            foundFeature = feature;
+                            break;
+                        }
+                    }
 
-            let foundFeature = null;
+                    if (foundFeature) {
+                        const geometry = foundFeature.getGeometry();
+                        const extent = geometry.getExtent();
+                        console.log('Feature Name:', foundFeature.get('NAME'));
+                        console.log('Extent:', extent);
 
-            for (const feature of features) {
-                const featureName = feature.get('NAME');
-                if (!featureName) continue;
-                const nameWords = featureName.toLowerCase().split(' ');
+                        if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
+                            map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
+                        } else {
+                            const center = ol.extent.getCenter(extent);
+                            map.getView().animate({ center, duration: 1000, zoom: 20 });
+                        }
+                    } else {
+                        alert('System not found');
+                        map.getView().setZoom(18);
+                    }
+                });
 
-                const allWordsMatch = searchWords.every(searchWord =>
-                    nameWords.some(nameWord => nameWord.includes(searchWord))
-                );
+                // Initialize routing functionality
+                setupRouting(map, routeLayer, systemsLayer);
 
-                if (allWordsMatch) {
-                    foundFeature = feature;
-                    break;
-                }
-            }
-
-            if (foundFeature) {
-                const geometry = foundFeature.getGeometry();
-                const extent = geometry.getExtent();
-                console.log('Feature Name:', foundFeature.get('NAME'));
-                console.log('Extent:', extent);
-
-                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
-                } else {
-                    const center = ol.extent.getCenter(extent);
-                    map.getView().animate({ center, duration: 1000, zoom: 20 });
-                }
-            } else {
-                alert('System not found');
-                map.getView().setZoom(18);
-            }
-        }
-
-        document.getElementById('search-button').addEventListener('click', handleSearch);
+                // Toggle background layers
+                let currentBackgroundIndex = 0;
+                document.getElementById('toggle-background').addEventListener('click', () => {
+                    currentBackgroundIndex = (currentBackgroundIndex + 1) % 2;
+                    layers[0].setVisible(currentBackgroundIndex === 0);
+                    layers[1].setVisible(currentBackgroundIndex === 1);
+                });
+            })
+            .catch(error => console.error('Error loading layers configuration:', error));
     </script>
-    <script src="./tools/routing.js"></script>
 </body>
 </html>
