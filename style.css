@@ -121,30 +121,49 @@
             background: #79aaca;
         }
 
-        .tooltip {
+       .tooltip {
             position: absolute;
-            z-index: 10000;
-            background: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 5px;
-            border-radius: 3px;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 14px;
-            display: none;
-            pointer-events: none; /* Ensure tooltip doesn't interfere with mouse events of underlying elements */
+            padding: 5px 10px;
+            border-radius: 5px;
+            pointer-events: none; /* Ensure tooltip does not block clicks */
+            display: none; /* Initially hide tooltip */
         }
 
         .popup {
-            background: rgba(0, 0, 0, 0.8);
+            max-width: 250px;
+            background-color: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 10px;
             border-radius: 5px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            max-width: 300px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .popup img {
             width: 100%;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .popup-info {
+            margin-top: 10px;
+        }
+
+        .popup-info h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .popup-info p {
+            margin: 5px 0 0;
+            font-size: 14px;
+        }
+
+        .popup-info a {
+            color: #79aaca;
+            text-decoration: none;
+        }
+
+        .popup-info a:hover {
+            text-decoration: underline;
         }
