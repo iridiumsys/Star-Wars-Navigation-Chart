@@ -22,14 +22,12 @@
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
         <button id="search-button" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
-    </div>
-    <div class="toggle-background-container">
-        <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
-    </div>
-    <div class="toggle-routing-container">
-        <button id="toggle-routing"><i class="fas fa-route"></i></button>
+        <div class="toggle-background-container">
+            <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+        </div>
     </div>
 
+    <script src="search.js"></script>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
@@ -94,11 +92,6 @@
                             offset: 25,
                             maxWidth: 'none' // Allow popup to expand based on content
                         }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
-
-                        // Close popup when clicking anywhere else on the map
-                        map.once('click', function() {
-                            popup.remove();
-                        });
                     });
                 })
                 .catch(error => {
@@ -114,108 +107,6 @@
                 map.setLayoutProperty(newBackground, 'visibility', 'visible');
                 currentBackground = newBackground;
             });
-
-            // Search functionality
-            document.getElementById('search-button').addEventListener('click', function() {
-                const searchInput = document.getElementById('search-input').value.trim();
-                if (!searchInput) {
-                    alert('Please enter a system name');
-                    return;
-                }
-
-                const searchWords = searchInput.toLowerCase().split(' ');
-
-                let foundFeature = null;
-
-                for (const feature of allFeatures) {
-                    const featureName = feature.properties.NAME;
-                    if (!featureName) continue;
-                    const nameWords = featureName.toLowerCase().split(' ');
-
-                    const allWordsMatch = searchWords.every(searchWord =>
-                        nameWords.some(nameWord => nameWord.includes(searchWord))
-                    );
-
-                    if (allWordsMatch) {
-                        foundFeature = feature;
-                        break;
-                    }
-                }
-
-                if (foundFeature) {
-                    const coordinates = foundFeature.geometry.coordinates;
-                    map.flyTo({ center: coordinates, zoom: 20 });
-                } else {
-                    alert('System not found');
-                    map.setZoom(18); // Reset zoom if not found
-                }
-            });
-
-            var startPoint, endPoint;
-            var routingActive = false;
-
-            document.getElementById('toggle-routing').addEventListener('click', function() {
-                routingActive = !routingActive;
-                this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-                if (routingActive) {
-                    map.once('click', function(event) {
-                        startPoint = [event.lngLat.lng, event.lngLat.lat];
-                        console.log('Start node:', startPoint);
-
-                        map.once('click', function(event) {
-                            endPoint = [event.lngLat.lng, event.lngLat.lat];
-                            console.log('End node:', endPoint);
-                            calculateAndDisplayRoute();
-                        });
-                    });
-                }
-            });
-
-            function calculateAndDisplayRoute() {
-                if (!startPoint || !endPoint) {
-                    alert('Please select both start and end points.');
-                    return;
-                }
-
-                // Use Turf.js to process the route data
-                fetch('./layers/routes.geojson')
-                    .then(response => response.json())
-                    .then(routeData => {
-                        // Find the nearest points on the routes to startPoint and endPoint
-                        var nearestStart = turf.nearestPointOnLine(routeData, turf.point(startPoint));
-                        var nearestEnd = turf.nearestPointOnLine(routeData, turf.point(endPoint));
-
-                        // Find the actual route between nearestStart and nearestEnd points
-                        var path = findRoute(routeData, nearestStart, nearestEnd);
-
-                        if (path) {
-                            map.addLayer({
-                                id: 'route',
-                                type: 'line',
-                                source: {
-                                    type: 'geojson',
-                                    data: path
-                                },
-                                layout: {
-                                    'line-join': 'round',
-                                    'line-cap': 'round'
-                                },
-                                paint: {
-                                    'line-color': '#ff7e5f',
-                                    'line-width': 4
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading route data:', error);
-                    });
-            }
-
-            function findRoute(routeData, start, end) {
-                // Implement the route finding logic
-                return null; // Placeholder, you need to implement this function based on your route data
-            }
         }
 
         var tooltip = document.createElement('div');
