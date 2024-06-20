@@ -6,21 +6,18 @@ body, html, #map {
     font-family: 'Urbanist', sans-serif;
 }
 
-.search-container, .toggle-background-container, .toggle-routing-container {
+.search-container {
     position: absolute;
     z-index: 1;
-    padding: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    margin: 10px;
-}
-
-.search-container {
     top: 10px;
     left: 10px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 #search-input {
@@ -37,8 +34,9 @@ body, html, #map {
 }
 
 .toggle-background-container {
-    top: 10px;
-    right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #toggle-background {
@@ -49,21 +47,13 @@ body, html, #map {
     cursor: pointer;
 }
 
-.toggle-routing-container {
-    top: 60px;
-    right: 10px;
-}
-
-#toggle-routing {
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
 .popup {
     font-family: 'Urbanist', sans-serif;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    animation: fadeIn 0.5s;
 }
 
 .popup img {
@@ -71,14 +61,26 @@ body, html, #map {
     height: auto;
     display: block;
     margin: 0 auto 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .popup-info h3 {
     margin: 0 0 10px;
+    font-size: 1.2em;
 }
 
 .popup-info p {
     margin: 0;
+}
+
+.popup-info a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.popup-info a:hover {
+    text-decoration: underline;
 }
 
 .tooltip {
@@ -90,4 +92,9 @@ body, html, #map {
     display: none;
     font-size: 14px;
     z-index: 2;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
