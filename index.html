@@ -71,13 +71,7 @@
                         }
                     });
 
-                    let currentPopup = null;
-
                     map.on('click', 'systems-layer', function(event) {
-                        if (currentPopup) {
-                            currentPopup.remove();
-                        }
-
                         var feature = event.features[0];
                         var coordinates = feature.geometry.coordinates.slice();
                         var properties = feature.properties;
@@ -91,7 +85,7 @@
                                                 </div>
                                             </div>`;
 
-                        currentPopup = new mapboxgl.Popup({
+                        var popup = new mapboxgl.Popup({
                             closeButton: true,
                             closeOnClick: false,
                             anchor: 'bottom',
@@ -101,8 +95,7 @@
 
                         // Close popup when clicking anywhere else on the map
                         map.once('click', function() {
-                            currentPopup.remove();
-                            currentPopup = null;
+                            popup.remove();
                         });
                     });
                 })
