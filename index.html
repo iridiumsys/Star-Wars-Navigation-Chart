@@ -71,12 +71,18 @@
                         }
                     });
 
+                    let currentPopup = null;
+
                     map.on('click', 'systems-layer', function(event) {
+                        if (currentPopup) {
+                            currentPopup.remove();
+                        }
+
                         var feature = event.features[0];
                         var coordinates = feature.geometry.coordinates.slice();
                         var properties = feature.properties;
 
-                        var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image">` : '';
+                        var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
                         var popupContent = `<div class="popup">
                                                 ${imageTag}
                                                 <div class="popup-info">
@@ -85,13 +91,19 @@
                                                 </div>
                                             </div>`;
 
-                        var popup = new mapboxgl.Popup({
+                        currentPopup = new mapboxgl.Popup({
                             closeButton: true,
                             closeOnClick: false,
                             anchor: 'bottom',
                             offset: 25,
                             maxWidth: 'none' // Allow popup to expand based on content
                         }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
+
+                        // Close popup when clicking anywhere else on the map
+                        map.once('click', function() {
+                            currentPopup.remove();
+                            currentPopup = null;
+                        });
                     });
                 })
                 .catch(error => {
