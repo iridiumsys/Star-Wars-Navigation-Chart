@@ -29,6 +29,9 @@
 
     <script src="tools/search.js"></script>
     <script>
+        var map;
+        var allFeatures = []; // To store all features from systems.geojson
+
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
         // Load the external layers list
@@ -37,10 +40,8 @@
             .then(layers => initializeMap(layers))
             .catch(error => console.error('Error loading layers:', error));
 
-        var allFeatures = []; // To store all features from systems.geojson
-
         function initializeMap(layers) {
-            var map = new mapboxgl.Map({
+            map = new mapboxgl.Map({
                 container: 'map',
                 style: {
                     version: 8,
