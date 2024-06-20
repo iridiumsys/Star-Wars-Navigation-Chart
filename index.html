@@ -19,6 +19,7 @@
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" type="text/css">
 </head>
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
@@ -75,28 +76,27 @@
                         var coordinates = feature.geometry.coordinates.slice();
                         var properties = feature.properties;
 
-                        if (properties.picture) {
-                            var popupContent = `<div class="popup">
-                                                    <img src="${properties.picture}" alt="System Image">
-                                                    <div class="popup-info">
-                                                        <h3>${properties.NAME}</h3>
-                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
-                                                    </div>
-                                                </div>`;
+                        var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image">` : '';
+                        var popupContent = `<div class="popup">
+                                                ${imageTag}
+                                                <div class="popup-info">
+                                                    <h3>${properties.NAME}</h3>
+                                                    ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                                </div>
+                                            </div>`;
 
-                            var popup = new mapboxgl.Popup({
-                                closeButton: true,
-                                closeOnClick: false,
-                                anchor: 'bottom',
-                                offset: 25,
-                                maxWidth: 'none' // Allow popup to expand based on content
-                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
+                        var popup = new mapboxgl.Popup({
+                            closeButton: true,
+                            closeOnClick: false,
+                            anchor: 'bottom',
+                            offset: 25,
+                            maxWidth: 'none' // Allow popup to expand based on content
+                        }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
 
-                            // Close popup when clicking anywhere else on the map
-                            map.once('click', function() {
-                                popup.remove();
-                            });
-                        }
+                        // Close popup when clicking anywhere else on the map
+                        map.once('click', function() {
+                            popup.remove();
+                        });
                     });
                 })
                 .catch(error => {
