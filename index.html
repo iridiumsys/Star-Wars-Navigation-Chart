@@ -37,6 +37,8 @@
             .then(layers => initializeMap(layers))
             .catch(error => console.error('Error loading layers:', error));
 
+        var allFeatures = []; // To store all features from systems.geojson
+
         function initializeMap(layers) {
             var map = new mapboxgl.Map({
                 container: 'map',
@@ -48,8 +50,6 @@
                 center: [0.00847486, -0.0109944],
                 zoom: 18
             });
-
-            var allFeatures = []; // To store all features from systems.geojson
 
             // Load all features from the systems.geojson
             fetch('./layers/systems.geojson')
@@ -67,7 +67,7 @@
                         },
                         'paint': {
                             'circle-radius': 6,
-                            'circle-color': 'rgba(255, 0, 0, 0.5)'
+                            'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
                         }
                     });
 
