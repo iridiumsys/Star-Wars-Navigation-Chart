@@ -16,24 +16,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link rel="stylesheet" href="./style.css" type="text/css">
+    <style>
+        .info-tooltip {
+            display: none;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .info-tooltip img {
+            display: block;
+            margin-top: 5px;
+            max-width: 100px;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
         <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
         <button id="search-button" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
-        <div class="toggle-background-container">
-            <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
-        </div>
     </div>
-
+    <div class="toggle-background-container">
+        <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+    </div>
     <div id="info-tooltip" class="info-tooltip"></div>
 
-    <script src="tools/search.js"></script>
+    <script src="./tools/search.js"></script>
     <script>
-        var map;
-        var allFeatures = []; // To store all features from systems.geojson
-
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
         // Load the external layers list
@@ -43,7 +58,7 @@
             .catch(error => console.error('Error loading layers:', error));
 
         function initializeMap(layers) {
-            map = new mapboxgl.Map({
+            var map = new mapboxgl.Map({
                 container: 'map',
                 style: {
                     version: 8,
@@ -54,14 +69,16 @@
                 zoom: 18
             });
 
-            map.on('load', function() {
-                // Load all features from the systems.geojson
-                fetch('./layers/systems.geojson')
-                    .then(response => response.json())
-                    .then(data => {
-                        allFeatures = data.features;
+            var allFeatures = []; // To store all features from systems.geojson
 
-                        // Add a layer to the map to display the systems
+            // Load all features from the systems.geojson
+            fetch('./layers/systems.geojson')
+                .then(response => response.json())
+                .then(data => {
+                    allFeatures = data.features;
+
+                    // Add a layer to the map to display the systems
+                    map.on('load', function() {
                         map.addLayer({
                             'id': 'systems-layer',
                             'type': 'circle',
@@ -71,35 +88,44 @@
                             },
                             'paint': {
                                 'circle-radius': 6,
-                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
+                                'circle-color': 'rgba(255, 0, 0, 0)'
                             }
                         });
 
-                        // Event listeners for hovering over the systems
+                        // Hover functionality
                         map.on('mousemove', 'systems-layer', function(e) {
                             var feature = e.features[0];
-                            var coordinates = feature.geometry.coordinates.slice();
                             var properties = feature.properties;
+                            var infoTooltip = document.getElementById('info-tooltip');
 
-                            var tooltipContent = `<div class="tooltip-content">
-                                <h3>${properties.NAME}</h3>
-                                ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
-                                ${properties.picture ? `<img src="${properties.picture}" alt="System Image" onerror="this.src='default-image.png';">` : ''}
-                            </div>`;
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image">` : '';
+                            var tooltipContent = `<strong>${properties.NAME}</strong><br>${properties.url_wookie ? `<a href="${properties.url_wookie}" target="_blank">More Info</a>` : ''}<br>${imageTag}`;
 
-                            var tooltip = document.getElementById('info-tooltip');
-                            tooltip.innerHTML = tooltipContent;
-                            tooltip.style.display = 'block';
-                            tooltip.style.left = e.originalEvent.pageX + 15 + 'px';
-                            tooltip.style.top = e.originalEvent.pageY + 15 + 'px';
+                            infoTooltip.innerHTML = tooltipContent;
+                            infoTooltip.style.display = 'block';
+                            infoTooltip.style.left = (e.originalEvent.pageX + 15) + 'px';
+                            infoTooltip.style.top = (e.originalEvent.pageY + 15) + 'px';
                         });
 
+                        // Hide tooltip when not hovering
                         map.on('mouseleave', 'systems-layer', function() {
-                            var tooltip = document.getElementById('info-tooltip');
-                            tooltip.style.display = 'none';
+                            var infoTooltip = document.getElementById('info-tooltip');
+                            infoTooltip.style.display = 'none';
                         });
-                    })
-                    .catch(error => console.error('Error loading systems data:', error));
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading systems data:', error);
+                });
+
+            // Toggle background functionality
+            var currentBackground = 'space-background';
+
+            document.getElementById('toggle-background').addEventListener('click', function() {
+                var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
+                map.setLayoutProperty(currentBackground, 'visibility', 'none');
+                map.setLayoutProperty(newBackground, 'visibility', 'visible');
+                currentBackground = newBackground;
             });
         }
 
