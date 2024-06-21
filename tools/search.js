@@ -1,4 +1,14 @@
 document.getElementById('search-button').addEventListener('click', function() {
+    performSearch();
+});
+
+document.getElementById('search-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        performSearch();
+    }
+});
+
+function performSearch() {
     const searchInput = document.getElementById('search-input').value.trim();
     if (!searchInput) {
         alert('Please enter a system name');
@@ -31,4 +41,4 @@ document.getElementById('search-button').addEventListener('click', function() {
         alert('System not found');
         map.setZoom(18); // Reset zoom if not found
     }
-});
+}
