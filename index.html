@@ -52,57 +52,59 @@
                 zoom: 18
             });
 
-            // Load all features from the systems.geojson
-            fetch('./layers/systems.geojson')
-                .then(response => response.json())
-                .then(data => {
-                    allFeatures = data.features;
+            map.on('load', function() {
+                // Load all features from the systems.geojson
+                fetch('./layers/systems.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        allFeatures = data.features;
 
-                    // Add a layer to the map to display the systems
-                    map.addLayer({
-                        'id': 'systems-layer',
-                        'type': 'circle',
-                        'source': {
-                            'type': 'geojson',
-                            'data': data
-                        },
-                        'paint': {
-                            'circle-radius': 6,
-                            'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
-                        }
-                    });
-
-                    map.on('click', 'systems-layer', function(event) {
-                        var feature = event.features[0];
-                        var coordinates = feature.geometry.coordinates.slice();
-                        var properties = feature.properties;
-
-                        var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
-                        var popupContent = `<div class="popup">
-                                                ${imageTag}
-                                                <div class="popup-info">
-                                                    <h3>${properties.NAME}</h3>
-                                                    ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
-                                                </div>
-                                            </div>`;
-
-                        var popup = new mapboxgl.Popup({
-                            closeButton: true,
-                            closeOnClick: false,
-                            anchor: 'bottom',
-                            offset: 25,
-                            maxWidth: 'none' // Allow popup to expand based on content
-                        }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
-
-                        // Close popup when clicking anywhere else on the map
-                        map.once('click', function() {
-                            popup.remove();
+                        // Add a layer to the map to display the systems
+                        map.addLayer({
+                            'id': 'systems-layer',
+                            'type': 'circle',
+                            'source': {
+                                'type': 'geojson',
+                                'data': data
+                            },
+                            'paint': {
+                                'circle-radius': 6,
+                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
+                            }
                         });
+
+                        map.on('click', 'systems-layer', function(event) {
+                            var feature = event.features[0];
+                            var coordinates = feature.geometry.coordinates.slice();
+                            var properties = feature.properties;
+
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
+                            var popupContent = `<div class="popup">
+                                                    ${imageTag}
+                                                    <div class="popup-info">
+                                                        <h3>${properties.NAME}</h3>
+                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                                    </div>
+                                                </div>`;
+
+                            var popup = new mapboxgl.Popup({
+                                closeButton: true,
+                                closeOnClick: false,
+                                anchor: 'bottom',
+                                offset: 25,
+                                maxWidth: 'none' // Allow popup to expand based on content
+                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
+
+                            // Close popup when clicking anywhere else on the map
+                            map.once('click', function() {
+                                popup.remove();
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading systems data:', error);
                     });
-                })
-                .catch(error => {
-                    console.error('Error loading systems data:', error);
-                });
+            });
 
             // Toggle background functionality
             var currentBackground = 'space-background';
