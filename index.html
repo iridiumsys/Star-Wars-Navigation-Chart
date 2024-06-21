@@ -78,36 +78,28 @@
                         // Event listeners for hovering over the systems
                         map.on('mousemove', 'systems-layer', function(e) {
                             var feature = e.features[0];
+                            var coordinates = feature.geometry.coordinates.slice();
                             var properties = feature.properties;
-                            var infoTooltip = document.getElementById('info-tooltip');
 
-                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" style="width: 100px; height: auto;">` : '';
-                            var tooltipContent = `<strong>${properties.NAME}</strong><br>${properties.url_wookie ? `<a href="${properties.url_wookie}" target="_blank">More Info</a>` : ''}<br>${imageTag}`;
+                            var tooltipContent = `<div class="tooltip-content">
+                                <h3>${properties.NAME}</h3>
+                                ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                ${properties.picture ? `<img src="${properties.picture}" alt="System Image" onerror="this.src='default-image.png';">` : ''}
+                            </div>`;
 
-                            infoTooltip.innerHTML = tooltipContent;
-                            infoTooltip.style.display = 'block';
-                            infoTooltip.style.left = (e.originalEvent.pageX + 15) + 'px';
-                            infoTooltip.style.top = (e.originalEvent.pageY + 15) + 'px';
+                            var tooltip = document.getElementById('info-tooltip');
+                            tooltip.innerHTML = tooltipContent;
+                            tooltip.style.display = 'block';
+                            tooltip.style.left = e.originalEvent.pageX + 15 + 'px';
+                            tooltip.style.top = e.originalEvent.pageY + 15 + 'px';
                         });
 
                         map.on('mouseleave', 'systems-layer', function() {
-                            var infoTooltip = document.getElementById('info-tooltip');
-                            infoTooltip.style.display = 'none';
+                            var tooltip = document.getElementById('info-tooltip');
+                            tooltip.style.display = 'none';
                         });
                     })
-                    .catch(error => {
-                        console.error('Error loading systems data:', error);
-                    });
-            });
-
-            // Toggle background functionality
-            var currentBackground = 'space-background';
-
-            document.getElementById('toggle-background').addEventListener('click', function() {
-                var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
-                map.setLayoutProperty(currentBackground, 'visibility', 'none');
-                map.setLayoutProperty(newBackground, 'visibility', 'visible');
-                currentBackground = newBackground;
+                    .catch(error => console.error('Error loading systems data:', error));
             });
         }
 
