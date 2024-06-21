@@ -27,6 +27,8 @@
         </div>
     </div>
 
+    <div id="info-tooltip" class="info-tooltip"></div>
+
     <script src="tools/search.js"></script>
     <script>
         var map;
@@ -73,32 +75,24 @@
                             }
                         });
 
-                        map.on('click', 'systems-layer', function(event) {
-                            var feature = event.features[0];
-                            var coordinates = feature.geometry.coordinates.slice();
+                        // Event listeners for hovering over the systems
+                        map.on('mousemove', 'systems-layer', function(e) {
+                            var feature = e.features[0];
                             var properties = feature.properties;
+                            var infoTooltip = document.getElementById('info-tooltip');
 
-                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
-                            var popupContent = `<div class="popup">
-                                                    ${imageTag}
-                                                    <div class="popup-info">
-                                                        <h3>${properties.NAME}</h3>
-                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
-                                                    </div>
-                                                </div>`;
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" style="width: 100px; height: auto;">` : '';
+                            var tooltipContent = `<strong>${properties.NAME}</strong><br>${properties.url_wookie ? `<a href="${properties.url_wookie}" target="_blank">More Info</a>` : ''}<br>${imageTag}`;
 
-                            var popup = new mapboxgl.Popup({
-                                closeButton: true,
-                                closeOnClick: false,
-                                anchor: 'bottom',
-                                offset: 25,
-                                maxWidth: 'none' // Allow popup to expand based on content
-                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
+                            infoTooltip.innerHTML = tooltipContent;
+                            infoTooltip.style.display = 'block';
+                            infoTooltip.style.left = (e.originalEvent.pageX + 15) + 'px';
+                            infoTooltip.style.top = (e.originalEvent.pageY + 15) + 'px';
+                        });
 
-                            // Close popup when clicking anywhere else on the map
-                            map.once('click', function() {
-                                popup.remove();
-                            });
+                        map.on('mouseleave', 'systems-layer', function() {
+                            var infoTooltip = document.getElementById('info-tooltip');
+                            infoTooltip.style.display = 'none';
                         });
                     })
                     .catch(error => {
