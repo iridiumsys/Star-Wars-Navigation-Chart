@@ -74,6 +74,16 @@
                             }
                         });
 
+                        map.on('mouseenter', 'systems-layer', function(event) {
+                            var feature = event.features[0];
+                            var properties = feature.properties;
+                            showTooltip(event, properties);
+                        });
+
+                        map.on('mouseleave', 'systems-layer', function() {
+                            hideTooltip();
+                        });
+
                         map.on('click', 'systems-layer', function(event) {
                             var feature = event.features[0];
                             var coordinates = feature.geometry.coordinates.slice();
