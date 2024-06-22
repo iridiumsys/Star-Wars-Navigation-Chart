@@ -31,15 +31,15 @@
     <script src="tools/tooltip.js"></script>
     <script>
         var map;
-        var allFeatures = []; // To store all features from systems.geojson
+        var allFeatures = []; // Pour stocker toutes les entités de systems.geojson
 
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
-        // Load the external layers list
+        // Chargement de la liste des couches externes
         fetch('./layers/layers.json')
             .then(response => response.json())
             .then(layers => initializeMap(layers))
-            .catch(error => console.error('Error loading layers:', error));
+            .catch(error => console.error('Erreur lors du chargement des couches :', error));
 
         function initializeMap(layers) {
             map = new mapboxgl.Map({
@@ -54,13 +54,13 @@
             });
 
             map.on('load', function() {
-                // Load all features from the systems.geojson
+                // Chargement de toutes les entités de systems.geojson
                 fetch('./layers/systems.geojson')
                     .then(response => response.json())
                     .then(data => {
                         allFeatures = data.features;
 
-                        // Add a layer to the map to display the systems
+                        // Ajout d'une couche pour afficher les systèmes sur la carte
                         map.addLayer({
                             'id': 'systems-layer',
                             'type': 'circle',
@@ -70,7 +70,7 @@
                             },
                             'paint': {
                                 'circle-radius': 6,
-                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
+                                'circle-color': 'rgba(255, 0, 0, 0)' // Points transparents
                             }
                         });
 
@@ -93,21 +93,21 @@
                                 closeOnClick: false,
                                 anchor: 'bottom',
                                 offset: 25,
-                                maxWidth: 'none' // Allow popup to expand based on content
+                                maxWidth: 'none' // Permet au popup de s'étendre en fonction du contenu
                             }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
 
-                            // Close popup when clicking anywhere else on the map
+                            // Fermer le popup en cliquant ailleurs sur la carte
                             map.once('click', function() {
                                 popup.remove();
                             });
                         });
                     })
                     .catch(error => {
-                        console.error('Error loading systems data:', error);
+                        console.error('Erreur lors du chargement des données de systèmes :', error);
                     });
             });
 
-            // Toggle background functionality
+            // Fonctionnalité de basculement du fond
             var currentBackground = 'space-background';
 
             document.getElementById('toggle-background').addEventListener('click', function() {
@@ -116,21 +116,6 @@
                 map.setLayoutProperty(newBackground, 'visibility', 'visible');
                 currentBackground = newBackground;
             });
-        }
-
-        var tooltip = document.createElement('div');
-        tooltip.setAttribute('class', 'tooltip');
-        document.body.appendChild(tooltip);
-
-        function showTooltip(event, message) {
-            tooltip.innerHTML = message;
-            tooltip.style.left = event.pageX + 'px';
-            tooltip.style.top = event.pageY + 'px';
-            tooltip.style.display = 'block';
-        }
-
-        function hideTooltip() {
-            tooltip.style.display = 'none';
         }
     </script>
 </body>
