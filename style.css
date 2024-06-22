@@ -55,22 +55,47 @@ body {
     background-color: #0056b3;
 }
 
-/* Tooltip styles */
-.tooltip {
-    position: absolute;
-    display: none;
-    background-color: #222;
+/* Style pour les popups */
+.mapboxgl-popup {
+    max-width: 300px;
+    font-family: 'Urbanist', sans-serif;
+    background: #1c1c1c;
+    border: 2px solid #444;
+    border-radius: 8px;
     color: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    z-index: 10;
-    pointer-events: none;
 }
 
-.tooltip img {
-    max-width: 200px;
-    max-height: 200px;
-    margin-top: 10px;
+.mapboxgl-popup-content {
+    padding: 10px;
+}
+
+.mapboxgl-popup-content h3 {
+    margin: 0 0 10px;
+    color: #fff;
+}
+
+.mapboxgl-popup-content a {
+    color: #79aaca;
+    text-decoration: none;
+}
+
+.mapboxgl-popup-content a:hover {
+    text-decoration: underline;
+}
+
+.mapboxgl-popup-content .popup-image {
+    width: 100%;
     border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.tooltip {
+    position: absolute;
+    background: #333;
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    display: none;
+    font-family: 'Urbanist', sans-serif;
 }
 
