@@ -55,7 +55,7 @@ body {
     background-color: #0056b3;
 }
 
-/* Style pour les popups */
+/* Style for popups */
 .mapboxgl-popup {
     max-width: 300px;
     font-family: 'Urbanist', sans-serif;
@@ -87,15 +87,5 @@ body {
     width: 100%;
     border-radius: 5px;
     margin-bottom: 10px;
-}
-
-.tooltip {
-    position: absolute;
-    background: #333;
-    color: #fff;
-    padding: 5px;
-    border-radius: 5px;
-    display: none;
-    font-family: 'Urbanist', sans-serif;
 }
 
