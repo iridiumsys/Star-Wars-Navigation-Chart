@@ -1,91 +1,100 @@
-body {
-    font-family: 'Urbanist', sans-serif;
+body, html, #map {
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    font-family: 'Urbanist', sans-serif;
 }
 
 .search-container {
     position: absolute;
+    z-index: 1;
     top: 10px;
     left: 10px;
-    z-index: 1;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 #search-input {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
 }
 
 #search-button {
-    padding: 10px 15px;
-    font-size: 14px;
-    background-color: #007bff;
+    padding: 5px 10px;
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-}
-
-#search-button:hover {
-    background-color: #0056b3;
 }
 
 .toggle-background-container {
-    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #toggle-background {
-    padding: 10px 15px;
-    font-size: 14px;
-    background-color: #007bff;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
 }
 
-#toggle-background:hover {
-    background-color: #0056b3;
-}
-
-/* Style for popups */
-.mapboxgl-popup {
-    max-width: 300px;
+.popup {
     font-family: 'Urbanist', sans-serif;
-    background: #1c1c1c;
-    border: 2px solid #444;
-    border-radius: 8px;
-    color: #fff;
-}
-
-.mapboxgl-popup-content {
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 10px;
     padding: 10px;
+    animation: fadeIn 0.5s;
 }
 
-.mapboxgl-popup-content h3 {
+.popup img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.popup-info h3 {
     margin: 0 0 10px;
-    color: #fff;
+    font-size: 1.2em;
 }
 
-.mapboxgl-popup-content a {
-    color: #79aaca;
+.popup-info p {
+    margin: 0;
+}
+
+.popup-info a {
+    color: #4CAF50;
     text-decoration: none;
 }
 
-.mapboxgl-popup-content a:hover {
+.popup-info a:hover {
     text-decoration: underline;
 }
 
-.mapboxgl-popup-content .popup-image {
-    width: 100%;
-    border-radius: 5px;
-    margin-bottom: 10px;
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: none;
+    font-size: 14px;
+    z-index: 2;
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
