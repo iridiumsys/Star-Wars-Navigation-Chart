@@ -20,10 +20,10 @@
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
-        <button id="search-button" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
+        <input type="text" id="search-input" placeholder="Search a system">
+        <button id="search-button">Search</button>
         <div class="toggle-background-container">
-            <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+            <button id="toggle-background"><i class="fas fa-star"></i></button>
         </div>
     </div>
 
@@ -115,21 +115,6 @@
                 map.setLayoutProperty(newBackground, 'visibility', 'visible');
                 currentBackground = newBackground;
             });
-        }
-
-        var tooltip = document.createElement('div');
-        tooltip.setAttribute('class', 'tooltip');
-        document.body.appendChild(tooltip);
-
-        function showTooltip(event, message) {
-            tooltip.innerHTML = message;
-            tooltip.style.left = event.pageX + 'px';
-            tooltip.style.top = event.pageY + 'px';
-            tooltip.style.display = 'block';
-        }
-
-        function hideTooltip() {
-            tooltip.style.display = 'none';
         }
     </script>
 </body>
