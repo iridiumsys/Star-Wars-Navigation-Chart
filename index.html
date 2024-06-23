@@ -75,9 +75,8 @@
                         });
 
                         map.on('mouseenter', 'systems-layer', function(event) {
-                            var features = event.features;
-                            var propertiesArray = features.map(feature => feature.properties);
-                            showTooltip(event.originalEvent, propertiesArray); // Pass array of properties
+                            var features = event.features.map(f => f.properties);
+                            showTooltip(event.originalEvent, features);
                         });
 
                         map.on('mouseleave', 'systems-layer', function() {
