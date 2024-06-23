@@ -20,10 +20,10 @@
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
-        <button id="search-button" onmouseover="showTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
+        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, { NAME: 'Search', picture: '' })" onmouseout="hideTooltip()">
+        <button id="search-button" onmouseover="showTooltip(event, { NAME: 'Search', picture: '' })" onmouseout="hideTooltip()">Search</button>
         <div class="toggle-background-container">
-            <button id="toggle-background" onmouseover="showTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+            <button id="toggle-background" onmouseover="showTooltip(event, { NAME: 'Switch Background', picture: '' })" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
         </div>
     </div>
 
@@ -77,7 +77,7 @@
                         map.on('mouseenter', 'systems-layer', function(event) {
                             var feature = event.features[0];
                             var properties = feature.properties;
-                            showTooltip(event, properties);
+                            showTooltip(event.originalEvent, properties); // Utilisation de originalEvent pour obtenir les coordonnées correctes
                         });
 
                         map.on('mouseleave', 'systems-layer', function() {
