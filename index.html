@@ -1,22 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Star Wars Navigation Chart</title>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars Navigation Chart</title>
 
-    <!-- OpenLayers -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css" />
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
-    <!-- ol-ext -->
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/ol-ext/dist/ol-ext.css" />
-    <script type="text/javascript" src="https://unpkg.com/ol-ext/dist/ol-ext.js"></script>
-
-    <!-- Graphlib and Graphlib-Dijkstra -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/graphlib/2.1.9/graphlib.min.js"></script>
-    <script src="https://unpkg.com/graphlib-dijkstra@2.0.1/dist/graphlib-dijkstra.min.js"></script>
+    <!-- Turf.js -->
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
     <!-- Custom styles -->
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
@@ -24,224 +18,114 @@
     <link rel="stylesheet" href="./style.css" type="text/css">
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system">
-        <button id="search-button">Search</button>
-    </div>
-    <div class="toggle-background-container">
-        <button id="toggle-background"><i class="fas fa-star"></i></button>
-    </div>
-    <div class="toggle-routing-container">
-        <button id="toggle-routing"><i class="fas fa-route"></i></button>
+        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
+        <button id="search-button" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
+        <div class="toggle-background-container">
+            <button id="toggle-background" onmouseover="showSmallTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+        </div>
     </div>
 
+    <script src="tools/search.js"></script>
+    <script src="tools/tooltip.js"></script>
     <script>
-        // Map initialization
-        const map = new ol.Map({
-            target: 'map',
-            view: new ol.View({
-                center: ol.proj.fromLonLat([0.00847486, -0.0109944]),
-                zoom: 18,
-            }),
-        });
+        var map;
+        var allFeatures = []; // To store all features from systems.geojson
 
-        // Background layers
-        const backgroundLayers = [
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ_Space/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }),
-                attribution: 'Space Background',
-            }),
-            new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: './XYZ/{z}/{x}/{y}.png',
-                    minZoom: 16,
-                    maxZoom: 22,
-                }),
-                attribution: 'White Background',
-            }),
-        ];
+        mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
-        let currentBackgroundIndex = 0;
-        map.addLayer(backgroundLayers[currentBackgroundIndex]);
+        // Load the external layers list
+        fetch('./layers/layers.json')
+            .then(response => response.json())
+            .then(layers => initializeMap(layers))
+            .catch(error => console.error('Error loading layers:', error));
 
-        document.getElementById('toggle-background').addEventListener('click', () => {
-            currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundLayers.length;
-            map.getLayers().setAt(0, backgroundLayers[currentBackgroundIndex]);
-        });
+        function initializeMap(layers) {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    sources: layers.sources,
+                    layers: layers.layers
+                },
+                center: [0.00847486, -0.0109944],
+                zoom: 18
+            });
 
-        // Systems Layer
-        const systemsSource = new ol.source.Vector({
-            url: './layers/systems.geojson',
-            format: new ol.format.GeoJSON(),
-        });
+            map.on('load', function() {
+                // Load all features from the systems.geojson
+                fetch('./layers/systems.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        allFeatures = data.features;
 
-        const transparentStyle = new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 0.5,
-                fill: new ol.style.Fill({ color: 'rgba(0, 0, 0, 0)' }),
-                stroke: new ol.style.Stroke({ color: 'rgba(0, 0, 0, 0)' }),
-            }),
-        });
+                        // Add a layer to the map to display the systems
+                        map.addLayer({
+                            'id': 'systems-layer',
+                            'type': 'circle',
+                            'source': {
+                                'type': 'geojson',
+                                'data': data
+                            },
+                            'paint': {
+                                'circle-radius': 6,
+                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
+                            }
+                        });
 
-        const systemsLayer = new ol.layer.Vector({
-            source: systemsSource,
-            style: transparentStyle,
-        });
+                        map.on('mouseenter', 'systems-layer', function(event) {
+                            var feature = event.features[0];
+                            var properties = feature.properties;
+                            showTooltip(event.originalEvent, properties); // Use originalEvent to get correct coordinates
+                        });
 
-        map.addLayer(systemsLayer);
+                        map.on('mouseleave', 'systems-layer', function() {
+                            hideTooltip();
+                        });
 
-        // Search Functionality
-        function handleSearch() {
-            const searchInput = document.getElementById('search-input').value.trim();
-            if (!searchInput) {
-                alert('Please enter a system name');
-                return;
-            }
+                        map.on('click', 'systems-layer', function(event) {
+                            var feature = event.features[0];
+                            var coordinates = feature.geometry.coordinates.slice();
+                            var properties = feature.properties;
 
-            const searchWords = searchInput.toLowerCase().split(' ');
-            const vectorSource = systemsLayer.getSource();
-            const features = vectorSource.getFeatures();
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
+                            var popupContent = `<div class="popup">
+                                                    ${imageTag}
+                                                    <div class="popup-info">
+                                                        <h3>${properties.NAME}</h3>
+                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                                    </div>
+                                                </div>`;
 
-            let foundFeature = null;
+                            var popup = new mapboxgl.Popup({
+                                closeButton: true,
+                                closeOnClick: false,
+                                anchor: 'bottom',
+                                offset: 25,
+                                maxWidth: 'none' // Allow popup to expand based on content
+                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
 
-            for (const feature of features) {
-                const featureName = feature.get('NAME');
-                if (!featureName) continue;
-                const nameWords = featureName.toLowerCase().split(' ');
-
-                const allWordsMatch = searchWords.every(searchWord =>
-                    nameWords.some(nameWord => nameWord.includes(searchWord))
-                );
-
-                if (allWordsMatch) {
-                    foundFeature = feature;
-                    break;
-                }
-            }
-
-            if (foundFeature) {
-                const geometry = foundFeature.getGeometry();
-                const extent = geometry.getExtent();
-                console.log('Feature Name:', foundFeature.get('NAME'));
-                console.log('Extent:', extent);
-
-                if (extent[0] !== extent[2] && extent[1] !== extent[3]) {
-                    map.getView().fit(extent, { duration: 1000, maxZoom: 20 });
-                } else {
-                    const center = ol.extent.getCenter(extent);
-                    map.getView().animate({ center, duration: 1000, zoom: 20 });
-                }
-            } else {
-                alert('System not found');
-                map.getView().setZoom(18);
-            }
-        }
-
-        document.getElementById('search-button').addEventListener('click', handleSearch);
-
-        // Routing Functionality
-        const routeLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                url: './layers/routes.geojson',
-                format: new ol.format.GeoJSON(),
-            }),
-            style: transparentStyle,
-        });
-
-        map.addLayer(routeLayer);
-
-        const routeFeatureOverlay = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'blue',
-                    width: 2,
-                }),
-                text: new ol.style.Text({
-                    font: '12px Calibri,sans-serif',
-                    fill: new ol.style.Fill({ color: 'black' }),
-                    stroke: new ol.style.Stroke({
-                        color: 'white',
-                        width: 3,
-                    }),
-                }),
-            }),
-        });
-
-        map.addLayer(routeFeatureOverlay);
-
-        let startPoint, endPoint;
-        let routingActive = false;
-
-        document.getElementById('toggle-routing').addEventListener('click', () => {
-            routingActive = !routingActive;
-            this.style.backgroundColor = routingActive ? '#79aaca' : 'rgba(0, 0, 0, 0.8)';
-            if (routingActive) {
-                map.once('click', event => {
-                    startPoint = event.coordinate;
-                    console.log('Start node:', startPoint);
-
-                    map.once('click', event => {
-                        endPoint = event.coordinate;
-                        console.log('End node:', endPoint);
-                        calculateAndDisplayRoute();
+                            // Close popup when clicking anywhere else on the map
+                            map.once('click', function() {
+                                popup.remove();
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading systems data:', error);
                     });
-                });
-            }
-        });
-
-        function calculateAndDisplayRoute() {
-            if (!startPoint || !endPoint) {
-                alert('Please select both start and end points.');
-                return;
-            }
-
-            const startProj = ol.proj.toLonLat(startPoint);
-            const endProj = ol.proj.toLonLat(endPoint);
-
-            const graph = new graphlib.Graph();
-
-            routeLayer.getSource().forEachFeature(feature => {
-                const geometry = feature.getGeometry();
-                const coordinates = geometry.getCoordinates();
-
-                for (let i = 0; i < coordinates.length - 1; i++) {
-                    const start = ol.proj.toLonLat(coordinates[i]);
-                    const end = ol.proj.toLonLat(coordinates[i + 1]);
-                    const distance = ol.sphere.getDistance(start, end);
-
-                    graph.setEdge(JSON.stringify(start), JSON.stringify(end), distance);
-                    graph.setEdge(JSON.stringify(end), JSON.stringify(start), distance);
-                }
             });
 
-            const dijkstra = graphlib.alg.dijkstra(graph, JSON.stringify(startProj));
-            const path = [];
+            // Toggle background functionality
+            var currentBackground = 'space-background';
 
-            let currNode = JSON.stringify(endProj);
-            while (currNode !== JSON.stringify(startProj)) {
-                path.push(JSON.parse(currNode));
-                if (dijkstra[currNode] && dijkstra[currNode].predecessor) {
-                    currNode = dijkstra[currNode].predecessor;
-                } else {
-                    alert('No route found between the selected points.');
-                    return;
-                }
-            }
-            path.push(startProj);
-            path.reverse();
-
-            const routeFeature = new ol.Feature({
-                geometry: new ol.geom.LineString(path.map(ol.proj.fromLonLat)),
+            document.getElementById('toggle-background').addEventListener('click', function() {
+                var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
+                map.setLayoutProperty(currentBackground, 'visibility', 'none');
+                map.setLayoutProperty(newBackground, 'visibility', 'visible');
+                currentBackground = newBackground;
             });
-
-            routeFeatureOverlay.getSource().clear();
-            routeFeatureOverlay.getSource().addFeature(routeFeature);
         }
     </script>
 </body>
