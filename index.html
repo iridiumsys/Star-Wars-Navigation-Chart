@@ -20,10 +20,10 @@
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showTooltip(event, { NAME: 'Search', picture: '' })" onmouseout="hideTooltip()">
-        <button id="search-button" onmouseover="showTooltip(event, { NAME: 'Search', picture: '' })" onmouseout="hideTooltip()">Search</button>
+        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
+        <button id="search-button" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
         <div class="toggle-background-container">
-            <button id="toggle-background" onmouseover="showTooltip(event, { NAME: 'Switch Background', picture: '' })" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+            <button id="toggle-background" onmouseover="showSmallTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
         </div>
     </div>
 
@@ -31,15 +31,15 @@
     <script src="tools/tooltip.js"></script>
     <script>
         var map;
-        var allFeatures = []; // Pour stocker toutes les entités de systems.geojson
+        var allFeatures = []; // To store all features from systems.geojson
 
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
-        // Chargement de la liste des couches externes
+        // Load the external layers list
         fetch('./layers/layers.json')
             .then(response => response.json())
             .then(layers => initializeMap(layers))
-            .catch(error => console.error('Erreur lors du chargement des couches :', error));
+            .catch(error => console.error('Error loading layers:', error));
 
         function initializeMap(layers) {
             map = new mapboxgl.Map({
@@ -54,13 +54,13 @@
             });
 
             map.on('load', function() {
-                // Chargement de toutes les entités de systems.geojson
+                // Load all features from the systems.geojson
                 fetch('./layers/systems.geojson')
                     .then(response => response.json())
                     .then(data => {
                         allFeatures = data.features;
 
-                        // Ajout d'une couche pour afficher les systèmes sur la carte
+                        // Add a layer to the map to display the systems
                         map.addLayer({
                             'id': 'systems-layer',
                             'type': 'circle',
@@ -70,14 +70,14 @@
                             },
                             'paint': {
                                 'circle-radius': 6,
-                                'circle-color': 'rgba(255, 0, 0, 0)' // Points transparents
+                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
                             }
                         });
 
                         map.on('mouseenter', 'systems-layer', function(event) {
                             var feature = event.features[0];
                             var properties = feature.properties;
-                            showTooltip(event.originalEvent, properties); // Utilisation de originalEvent pour obtenir les coordonnées correctes
+                            showTooltip(event.originalEvent, properties); // Use originalEvent to get correct coordinates
                         });
 
                         map.on('mouseleave', 'systems-layer', function() {
@@ -103,21 +103,21 @@
                                 closeOnClick: false,
                                 anchor: 'bottom',
                                 offset: 25,
-                                maxWidth: 'none' // Permet au popup de s'étendre en fonction du contenu
+                                maxWidth: 'none' // Allow popup to expand based on content
                             }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
 
-                            // Fermer le popup en cliquant ailleurs sur la carte
+                            // Close popup when clicking anywhere else on the map
                             map.once('click', function() {
                                 popup.remove();
                             });
                         });
                     })
                     .catch(error => {
-                        console.error('Erreur lors du chargement des données de systèmes :', error);
+                        console.error('Error loading systems data:', error);
                     });
             });
 
-            // Fonctionnalité de basculement du fond
+            // Toggle background functionality
             var currentBackground = 'space-background';
 
             document.getElementById('toggle-background').addEventListener('click', function() {
