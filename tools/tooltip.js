@@ -1,9 +1,13 @@
-// Création du tooltip
+// Create tooltips
 var tooltip = document.createElement('div');
 tooltip.setAttribute('class', 'tooltip');
 document.body.appendChild(tooltip);
 
-// Fonction pour afficher le tooltip avec le nom et l'image du système
+var smallTooltip = document.createElement('div');
+smallTooltip.setAttribute('class', 'tooltip small-tooltip');
+document.body.appendChild(smallTooltip);
+
+// Function to show tooltip with system info
 function showTooltip(event, properties) {
     var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="tooltip-image">` : '';
     var tooltipContent = `<div class="tooltip-content">
@@ -13,23 +17,34 @@ function showTooltip(event, properties) {
 
     tooltip.innerHTML = tooltipContent;
     tooltip.style.display = 'block';
-    positionTooltip(event);
+    positionTooltip(event, tooltip);
 }
 
-// Fonction pour positionner le tooltip près du curseur
-function positionTooltip(event) {
-    tooltip.style.left = event.pageX + 10 + 'px'; // Décalage de 10px à droite du curseur
-    tooltip.style.top = event.pageY + 10 + 'px'; // Décalage de 10px en dessous du curseur
+// Function to show small tooltip for other functionalities
+function showSmallTooltip(event, message) {
+    smallTooltip.innerHTML = message;
+    smallTooltip.style.display = 'block';
+    positionTooltip(event, smallTooltip);
 }
 
-// Fonction pour cacher le tooltip
+// Function to position the tooltip near the cursor
+function positionTooltip(event, tooltipElement) {
+    tooltipElement.style.left = event.pageX + 10 + 'px'; // Offset 10px to the right of the cursor
+    tooltipElement.style.top = event.pageY + 10 + 'px'; // Offset 10px below the cursor
+}
+
+// Function to hide tooltips
 function hideTooltip() {
     tooltip.style.display = 'none';
+    smallTooltip.style.display = 'none';
 }
 
-// Suivi du mouvement de la souris pour mettre à jour la position du tooltip
+// Track mouse movement to update tooltip position
 document.addEventListener('mousemove', function(event) {
     if (tooltip.style.display === 'block') {
-        positionTooltip(event);
+        positionTooltip(event, tooltip);
+    }
+    if (smallTooltip.style.display === 'block') {
+        positionTooltip(event, smallTooltip);
     }
 });
