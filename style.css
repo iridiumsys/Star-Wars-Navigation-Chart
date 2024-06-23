@@ -55,6 +55,9 @@ body, html, #map {
     padding: 10px;
     animation: fadeIn 0.5s;
     max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .popup img {
@@ -84,7 +87,6 @@ body, html, #map {
     text-decoration: underline;
 }
 
-/* Style for general tooltip */
 /* Style for the tooltip container */
 .tooltip-container {
     position: absolute;
@@ -116,23 +118,6 @@ body, html, #map {
     margin-top: 5px;
     display: block;
 }
-
-/* Additional styling for popup */
-.popup {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.popup-image {
-    max-width: 100px;
-    height: auto;
-}
-
-.popup-info {
-    text-align: center;
-}
-
 
 @keyframes fadeIn {
     from { opacity: 0; }
