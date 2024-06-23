@@ -5,7 +5,7 @@ document.body.appendChild(tooltip);
 
 // Fonction pour afficher le tooltip avec le nom et l'image du système
 function showTooltip(event, properties) {
-    var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
+    var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="tooltip-image">` : '';
     var tooltipContent = `<div class="tooltip-content">
                             <h3>${properties.NAME}</h3>
                             ${imageTag}
