@@ -1,0 +1,84 @@
+{
+    "sources": {
+        "space-background": {
+            "type": "raster",
+            "tiles": ["./XYZ_Space/{z}/{x}/{y}.png"],
+            "tileSize": 256,
+            "minzoom": 16,
+            "maxzoom": 22
+        },
+        "white-background": {
+            "type": "raster",
+            "tiles": ["./XYZ/{z}/{x}/{y}.png"],
+            "tileSize": 256,
+            "minzoom": 16,
+            "maxzoom": 22
+        },
+        "systems": {
+            "type": "geojson",
+            "data": "./layers/systems.geojson"
+        },
+        "routes": {
+            "type": "geojson",
+            "data": "./layers/routes.geojson"
+        },
+        "route-line": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        }
+    },
+    "layers": [
+        {
+            "id": "space-background",
+            "type": "raster",
+            "source": "space-background",
+            "layout": { "visibility": "visible" }
+        },
+        {
+            "id": "white-background",
+            "type": "raster",
+            "source": "white-background",
+            "layout": { "visibility": "none" }
+        },
+        {
+            "id": "systems",
+            "type": "circle",
+            "source": "systems",
+            "paint": {
+                "circle-radius": 5,
+                "circle-color": "#f00",
+                "circle-opacity": 0
+            }
+        },
+        {
+            "id": "routes",
+            "type": "line",
+            "source": "routes",
+            "paint": {
+                "line-color": "#000",
+                "line-opacity": 0
+            }
+        },
+        {
+            "id": "route-line-halo-layer",
+            "type": "line",
+            "source": "route-line",
+            "paint": {
+                "line-color": "rgba(255, 127, 80, 0.5)",
+                "line-width": 8
+            }
+        },
+        {
+            "id": "route-line-layer",
+            "type": "line",
+            "source": "route-line",
+            "paint": {
+                "line-color": "#FF7F50",
+                "line-width": 4
+            }
+        }
+    ]
+}

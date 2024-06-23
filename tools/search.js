@@ -1,32 +1,75 @@
-function handleSearch() {
-  const searchInput = document.getElementById('search-input').value;
-  const vectorLayer = map.getLayers().getArray().find(layer => layer instanceof ol.layer.Vector && layer.getSource() === SystemsSource);
-  if (!vectorLayer) {
-    alert('No vector layer found');
-    return;
-  }
-  const vectorSource = vectorLayer.getSource();
-  const features = vectorSource.getFeatures();
-  let foundFeature = null;
-  for (let i = 0; i < features.length; i++) {
-    const feature = features[i];
-    const featureName = feature.get('NAME'); // Assurez-vous que le champ du nom dans le GeoJSON est "name"
-    console.log('Feature Name:', featureName); // Log feature name
-    if (featureName && featureName.toLowerCase() === searchInput.toLowerCase()) {
-      foundFeature = feature;
-      break;
+document.getElementById('search-button').addEventListener('click', function() {
+    performSearch();
+});
+
+document.getElementById('search-input').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        performSearch();
     }
-  }
-  if (foundFeature) {
-    const geometry = foundFeature.getGeometry();
-    const extent = geometry.getExtent();
-    console.log('Extent:', extent); // Log extent
-    map.getView().fit(extent, { duration: 1000 });
-    // Set a minimum zoom level after zooming
-    map.getView().setMinZoom(20); // Example: Setting minimum zoom level to 20
-  } else {
-    alert('Object not found');
-  }
+});
+
+function performSearch() {
+    const searchInput = document.getElementById('search-input').value.trim();
+    if (!searchInput) {
+        alert('Please enter a system name');
+        return;
+    }
+
+    const searchWords = searchInput.toLowerCase().split(' ');
+
+    let foundFeature = null;
+    let minDistance = Infinity;
+
+    for (const feature of allFeatures) {
+        const featureName = feature.properties.NAME;
+        if (!featureName) continue;
+        const nameWords = featureName.toLowerCase().split(' ');
+
+        const distances = searchWords.map(searchWord => 
+            Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
+        );
+
+        const totalDistance = distances.reduce((a, b) => a + b, 0);
+
+        if (totalDistance < minDistance) {
+            minDistance = totalDistance;
+            foundFeature = feature;
+        }
+    }
+
+    if (foundFeature && minDistance < 3) { // Set a threshold for acceptable distance
+        const coordinates = foundFeature.geometry.coordinates;
+        map.flyTo({ center: coordinates, zoom: 20 });
+    } else {
+        alert('System not found');
+        map.setZoom(18); // Reset zoom if not found
+    }
 }
 
-document.getElementById('search-button').addEventListener('click', handleSearch);
+function levenshteinDistance(a, b) {
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) == a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    matrix[i][j - 1] + 1,     // insertion
+                    matrix[i - 1][j] + 1      // deletion
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}

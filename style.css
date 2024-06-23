@@ -1,122 +1,112 @@
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Urbanist', sans-serif;
-        }
+body, html, #map {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Urbanist', sans-serif;
+}
 
-        html, body, #map {
-            width: 100%;
-            height: 100%;
-        }
+.search-container {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-        .search-container {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(122, 181, 217, 0.5);
-            display: flex;
-            align-items: center;
-            z-index: 1000;
-        }
+#search-input {
+    padding: 5px;
+    font-size: 16px;
+}
 
-        .search-container input {
-            padding: 5px;
-            border: none;
-            border-radius: 3px;
-            margin-right: 10px;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 16px;
-            color: #edf6fc;
-            background: rgba(255, 255, 255, 0.1);
-            outline: none;
-        }
+#search-button {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        .search-container button#search-button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            background: #9cd0f3;
-            color: black;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
+.toggle-background-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        .search-container button#search-button:hover {
-            background: #79aaca;
-        }
+#toggle-background {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
 
-        .ol-zoom {
-            bottom: 100px !important;
-        }
+.popup {
+    font-family: 'Urbanist', sans-serif;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 10px;
+    animation: fadeIn 0.5s;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .ol-zoom button {
-            background: rgba(0, 0, 0, 0.8) !important;
-            color: white !important;
-            border-radius: 50%;
-            transition: background 0.3s;
-        }
+.popup img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
 
-        .ol-zoom button:hover {
-            background: #9cd0f3 !important;
-        }
+.popup-info h3 {
+    margin: 0 0 10px;
+    font-size: 1.2em;
+}
 
-        .toggle-background-container, .toggle-routing-container {
-            position: absolute;
-            right: 10px;
-            bottom: 65px;
-            z-index: 1000;
-        }
+.popup-info p {
+    margin: 0;
+}
 
-        .toggle-background-container {
-            bottom: 120px; /* Adjust position to stack buttons */
-        }
+.popup-info a {
+    color: #4CAF50;
+    text-decoration: none;
+}
 
-        .toggle-background-container button, .toggle-routing-container button {
-            padding: 10px;
-            border: none;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-size: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(122, 181, 217, 0.5);
-            transition: background 0.3s;
-        }
+.popup-info a:hover {
+    text-decoration: underline;
+}
 
-        .toggle-background-container button:hover, .toggle-routing-container button:hover {
-            background: #9cd0f3;
-        }
+/* Style for general tooltip */
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: none;
+    font-size: 14px;
+    z-index: 2;
+}
 
-        .routing-container {
-            position: absolute;
-            top: 60px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(122, 181, 217, 0.5);
-            display: flex;
-            align-items: center;
-            z-index: 1000;
-        }
+/* Additional style for smaller tooltips */
+.small-tooltip {
+    font-size: 12px;
+    padding: 3px 7px;
+    border-radius: 3px;
+}
 
-        .routing-container button {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 3px;
-            background: #9cd0f3;
-            color: black;
-            font-family: 'Urbanist', sans-serif;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .routing-container button:hover {
-            background: #79aaca;
-        }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
