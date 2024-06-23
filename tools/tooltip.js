@@ -1,50 +1,136 @@
-// Create tooltips
-var tooltip = document.createElement('div');
-tooltip.setAttribute('class', 'tooltip');
-document.body.appendChild(tooltip);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars Navigation Chart</title>
 
-var smallTooltip = document.createElement('div');
-smallTooltip.setAttribute('class', 'tooltip small-tooltip');
-document.body.appendChild(smallTooltip);
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
-// Function to show tooltip with system info
-function showTooltip(event, properties) {
-    var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="tooltip-image">` : '';
-    var tooltipContent = `<div class="tooltip-content">
-                            <h3>${properties.NAME}</h3>
-                            ${imageTag}
-                          </div>`;
+    <!-- Turf.js -->
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
 
-    tooltip.innerHTML = tooltipContent;
-    tooltip.style.display = 'block';
-    positionTooltip(event, tooltip);
-}
+    <!-- Custom styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" type="text/css">
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
+        <button id="search-button" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
+        <div class="toggle-background-container">
+            <button id="toggle-background" onmouseover="showSmallTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
+        </div>
+    </div>
 
-// Function to show small tooltip for other functionalities
-function showSmallTooltip(event, message) {
-    smallTooltip.innerHTML = message;
-    smallTooltip.style.display = 'block';
-    positionTooltip(event, smallTooltip);
-}
+    <script src="tools/search.js"></script>
+    <script src="tools/tooltip.js"></script>
+    <script>
+        var map;
+        var allFeatures = []; // To store all features from systems.geojson
 
-// Function to position the tooltip near the cursor
-function positionTooltip(event, tooltipElement) {
-    tooltipElement.style.left = event.pageX + 10 + 'px'; // Offset 10px to the right of the cursor
-    tooltipElement.style.top = event.pageY + 10 + 'px'; // Offset 10px below the cursor
-}
+        mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
-// Function to hide tooltips
-function hideTooltip() {
-    tooltip.style.display = 'none';
-    smallTooltip.style.display = 'none';
-}
+        // Load the external layers list
+        fetch('./layers/layers.json')
+            .then(response => response.json())
+            .then(layers => initializeMap(layers))
+            .catch(error => console.error('Error
 
-// Track mouse movement to update tooltip position
-document.addEventListener('mousemove', function(event) {
-    if (tooltip.style.display === 'block') {
-        positionTooltip(event, tooltip);
-    }
-    if (smallTooltip.style.display === 'block') {
-        positionTooltip(event, smallTooltip);
-    }
-});
+html
+
+loading layers:', error));
+
+        function initializeMap(layers) {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: {
+                    version: 8,
+                    sources: layers.sources,
+                    layers: layers.layers
+                },
+                center: [0.00847486, -0.0109944],
+                zoom: 18
+            });
+
+            map.on('load', function() {
+                // Load all features from the systems.geojson
+                fetch('./layers/systems.geojson')
+                    .then(response => response.json())
+                    .then(data => {
+                        allFeatures = data.features;
+
+                        // Add a layer to the map to display the systems
+                        map.addLayer({
+                            'id': 'systems-layer',
+                            'type': 'circle',
+                            'source': {
+                                'type': 'geojson',
+                                'data': data
+                            },
+                            'paint': {
+                                'circle-radius': 6,
+                                'circle-color': 'rgba(255, 0, 0, 0)' // Transparent points
+                            }
+                        });
+
+                        map.on('mouseenter', 'systems-layer', function(event) {
+                            var features = event.features;
+                            var propertiesArray = features.map(feature => feature.properties);
+                            showTooltip(event.originalEvent, propertiesArray); // Pass array of properties
+                        });
+
+                        map.on('mouseleave', 'systems-layer', function() {
+                            hideTooltip();
+                        });
+
+                        map.on('click', 'systems-layer', function(event) {
+                            var features = event.features;
+                            var coordinates = features[0].geometry.coordinates.slice();
+                            var properties = features[0].properties;
+
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
+                            var popupContent = `<div class="popup">
+                                                    ${imageTag}
+                                                    <div class="popup-info">
+                                                        <h3>${properties.NAME}</h3>
+                                                        ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
+                                                    </div>
+                                                </div>`;
+
+                            var popup = new mapboxgl.Popup({
+                                closeButton: true,
+                                closeOnClick: false,
+                                anchor: 'bottom',
+                                offset: 25,
+                                maxWidth: 'none' // Allow popup to expand based on content
+                            }).setLngLat(coordinates).setHTML(popupContent).addTo(map);
+
+                            // Close popup when clicking anywhere else on the map
+                            map.once('click', function() {
+                                popup.remove();
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading systems data:', error);
+                    });
+            });
+
+            // Toggle background functionality
+            var currentBackground = 'space-background';
+
+            document.getElementById('toggle-background').addEventListener('click', function() {
+                var newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
+                map.setLayoutProperty(currentBackground, 'visibility', 'none');
+                map.setLayoutProperty(newBackground, 'visibility', 'visible');
+                currentBackground = newBackground;
+            });
+        }
+    </script>
+</body>
+</html>
