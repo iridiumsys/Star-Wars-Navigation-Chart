@@ -75,8 +75,9 @@
                         });
 
                         map.on('mouseenter', 'systems-layer', function(event) {
-                            var features = event.features.map(f => f.properties);
-                            showTooltip(event.originalEvent, features);
+                            var feature = event.features[0];
+                            var properties = feature.properties;
+                            showTooltip(event.originalEvent, properties); // Use originalEvent to get correct coordinates
                         });
 
                         map.on('mouseleave', 'systems-layer', function() {
@@ -84,9 +85,9 @@
                         });
 
                         map.on('click', 'systems-layer', function(event) {
-                            var features = event.features;
-                            var coordinates = features[0].geometry.coordinates.slice();
-                            var properties = features[0].properties;
+                            var feature = event.features[0];
+                            var coordinates = feature.geometry.coordinates.slice();
+                            var properties = feature.properties;
 
                             var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
                             var popupContent = `<div class="popup">
