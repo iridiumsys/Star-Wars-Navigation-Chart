@@ -85,23 +85,54 @@ body, html, #map {
 }
 
 /* Style for general tooltip */
-.tooltip {
+/* Style for the tooltip container */
+.tooltip-container {
     position: absolute;
+    display: none;
+    z-index: 2;
+}
+
+/* Style for individual tooltips */
+.tooltip {
     background-color: #333;
     color: #fff;
     padding: 5px 10px;
     border-radius: 4px;
-    display: none;
+    margin-top: 5px; /* Spacing between stacked tooltips */
     font-size: 14px;
-    z-index: 2;
 }
 
-/* Additional style for smaller tooltips */
+/* Style for small tooltips */
 .small-tooltip {
     font-size: 12px;
     padding: 3px 7px;
     border-radius: 3px;
 }
+
+/* Style for tooltip images */
+.tooltip-image {
+    width: 50px;
+    height: auto;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Additional styling for popup */
+.popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.popup-image {
+    max-width: 100px;
+    height: auto;
+}
+
+.popup-info {
+    text-align: center;
+}
+
 
 @keyframes fadeIn {
     from { opacity: 0; }
