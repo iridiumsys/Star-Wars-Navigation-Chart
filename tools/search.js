@@ -8,6 +8,52 @@ document.getElementById('search-input').addEventListener('keydown', function(eve
     }
 });
 
+// Add event listener to show suggestions as the user types
+document.getElementById('search-input').addEventListener('input', function() {
+    showSuggestions(this.value);
+});
+
+let systemsData = [];
+fetch('./layers/systems.geojson')
+    .then(response => response.json())
+    .then(data => {
+        systemsData = data.features;
+        allFeatures = systemsData; // Assign to the existing allFeatures variable
+    })
+    .catch(error => console.error('Error loading systems data:', error));
+
+function showSuggestions(value) {
+    const suggestionsContainer = document.getElementById('suggestions-container');
+    suggestionsContainer.innerHTML = '';
+
+    if (!value) {
+        suggestionsContainer.style.display = 'none';
+        return;
+    }
+
+    const searchValue = value.toLowerCase();
+    const suggestions = systemsData
+        .filter(system => system.properties.NAME.toLowerCase().includes(searchValue))
+        .slice(0, 10); // Limit the number of suggestions
+
+    if (suggestions.length > 0) {
+        suggestions.forEach(system => {
+            const suggestionElement = document.createElement('div');
+            suggestionElement.className = 'suggestion';
+            suggestionElement.innerText = system.properties.NAME;
+            suggestionElement.addEventListener('click', function() {
+                document.getElementById('search-input').value = system.properties.NAME;
+                performSearch();
+                suggestionsContainer.style.display = 'none';
+            });
+            suggestionsContainer.appendChild(suggestionElement);
+        });
+        suggestionsContainer.style.display = 'block';
+    } else {
+        suggestionsContainer.style.display = 'none';
+    }
+}
+
 function performSearch() {
     const searchInput = document.getElementById('search-input').value.trim();
     if (!searchInput) {
