@@ -55,33 +55,37 @@ function showSuggestions(value) {
 }
 
 function performSearch(system = null) {
+    if (system) {
+        const coordinates = system.geometry.coordinates;
+        map.flyTo({ center: coordinates, zoom: 20 });
+        return;
+    }
+
     const searchInput = document.getElementById('search-input').value.trim();
-    if (!searchInput && !system) {
+    if (!searchInput) {
         alert('Please enter a system name');
         return;
     }
 
     const searchWords = searchInput.toLowerCase().split(' ');
 
-    let foundFeature = system || null;
+    let foundFeature = null;
     let minDistance = Infinity;
 
-    if (!foundFeature) {
-        for (const feature of allFeatures) {
-            const featureName = feature.properties.NAME;
-            if (!featureName) continue;
-            const nameWords = featureName.toLowerCase().split(' ');
+    for (const feature of allFeatures) {
+        const featureName = feature.properties.NAME;
+        if (!featureName) continue;
+        const nameWords = featureName.toLowerCase().split(' ');
 
-            const distances = searchWords.map(searchWord => 
-                Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
-            );
+        const distances = searchWords.map(searchWord => 
+            Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
+        );
 
-            const totalDistance = distances.reduce((a, b) => a + b, 0);
+        const totalDistance = distances.reduce((a, b) => a + b, 0);
 
-            if (totalDistance < minDistance) {
-                minDistance = totalDistance;
-                foundFeature = feature;
-            }
+        if (totalDistance < minDistance) {
+            minDistance = totalDistance;
+            foundFeature = feature;
         }
     }
 
