@@ -20,12 +20,15 @@
 <body>
     <div id="map" style="width: 100%; height: 100vh;"></div>
     <div class="search-container">
-        <input type="text" id="search-input" placeholder="Search a system" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
-        <button id="search-button" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
-        <div class="toggle-background-container">
-            <button id="toggle-background" onmouseover="showSmallTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
-        </div>
+    <input type="text" id="search-input" placeholder="Search a system" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">
+    <div id="suggestions-container"></div>
+    <button id="search-button" onmouseover="showSmallTooltip(event, 'Search for a system')" onmouseout="hideTooltip()">Search</button>
+    <div class="toggle-background-container">
+        <button id="toggle-background" onmouseover="showSmallTooltip(event, 'Switch the background')" onmouseout="hideTooltip()"><i class="fas fa-star"></i></button>
     </div>
+</div>
+
+    
 
     <script src="tools/search.js"></script>
     <script src="tools/tooltip.js"></script>
