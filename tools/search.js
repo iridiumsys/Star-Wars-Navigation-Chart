@@ -43,7 +43,7 @@ function showSuggestions(value) {
             suggestionElement.innerText = system.properties.NAME;
             suggestionElement.addEventListener('click', function() {
                 document.getElementById('search-input').value = system.properties.NAME;
-                performSearch();
+                performSearch(system);
                 suggestionsContainer.style.display = 'none';
             });
             suggestionsContainer.appendChild(suggestionElement);
@@ -54,7 +54,7 @@ function showSuggestions(value) {
     }
 }
 
-function performSearch() {
+function performSearch(system = null) {
     const searchInput = document.getElementById('search-input').value.trim();
     if (!searchInput) {
         alert('Please enter a system name');
@@ -63,29 +63,34 @@ function performSearch() {
 
     const searchWords = searchInput.toLowerCase().split(' ');
 
-    let foundFeature = null;
+    let foundFeature = system || null;
     let minDistance = Infinity;
 
-    for (const feature of allFeatures) {
-        const featureName = feature.properties.NAME;
-        if (!featureName) continue;
-        const nameWords = featureName.toLowerCase().split(' ');
+    if (!foundFeature) {
+        for (const feature of allFeatures) {
+            const featureName = feature.properties.NAME;
+            if (!featureName) continue;
+            const nameWords = featureName.toLowerCase().split(' ');
 
-        const distances = searchWords.map(searchWord => 
-            Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
-        );
+            const distances = searchWords.map(searchWord => 
+                Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
+            );
 
-        const totalDistance = distances.reduce((a, b) => a + b, 0);
+            const totalDistance = distances.reduce((a, b) => a + b, 0);
 
-        if (totalDistance < minDistance) {
-            minDistance = totalDistance;
-            foundFeature = feature;
+            if (totalDistance < minDistance) {
+                minDistance = totalDistance;
+                foundFeature = feature;
+            }
         }
     }
 
     if (foundFeature && minDistance < 3) { // Set a threshold for acceptable distance
         const coordinates = foundFeature.geometry.coordinates;
         map.flyTo({ center: coordinates, zoom: 20 });
+        if (foundFeature.properties.url_wookie) {
+            window.open(foundFeature.properties.url_wookie, '_blank');
+        }
     } else {
         alert('System not found');
         map.setZoom(18); // Reset zoom if not found
