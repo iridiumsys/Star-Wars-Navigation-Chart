@@ -56,7 +56,7 @@ function showSuggestions(value) {
 
 function performSearch(system = null) {
     const searchInput = document.getElementById('search-input').value.trim();
-    if (!searchInput) {
+    if (!searchInput && !system) {
         alert('Please enter a system name');
         return;
     }
@@ -88,9 +88,6 @@ function performSearch(system = null) {
     if (foundFeature && minDistance < 3) { // Set a threshold for acceptable distance
         const coordinates = foundFeature.geometry.coordinates;
         map.flyTo({ center: coordinates, zoom: 20 });
-        if (foundFeature.properties.url_wookie) {
-            window.open(foundFeature.properties.url_wookie, '_blank');
-        }
     } else {
         alert('System not found');
         map.setZoom(18); // Reset zoom if not found
