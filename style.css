@@ -28,6 +28,7 @@ body, html, #map {
 .target-circle-icon {
     width: 16px;
     height: 16px;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
     border: 2px solid white;
     border-radius: 50%;
     display: inline-block;
@@ -63,14 +64,19 @@ body, html, #map {
 }
 
 .toggle-background-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top: 70px; /* Adjusted position under the search box */
+    left: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
 #toggle-background {
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
     color: white;
     border: none;
     cursor: pointer;
