@@ -60,8 +60,9 @@ body, html, #map {
 }
 
 .suggestion {
-    padding: 10px;
+    padding: 5px; /* Smaller padding */
     cursor: pointer;
+    font-size: 14px; /* Smaller font size */
 }
 
 .suggestion:hover {
