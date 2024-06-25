@@ -33,7 +33,10 @@ function showSuggestions(value) {
 
     const searchValue = value.toLowerCase();
     const suggestions = systemsData
-        .filter(system => system.properties.NAME.toLowerCase().includes(searchValue))
+        .filter(system => 
+            system.properties.NAME.toLowerCase().includes(searchValue) ||
+            (system.properties.ALT_NAME && system.properties.ALT_NAME.toLowerCase().includes(searchValue))
+        )
         .slice(0, 10); // Limit the number of suggestions
 
     if (suggestions.length > 0) {
@@ -73,12 +76,16 @@ function performSearch(system = null) {
     let minDistance = Infinity;
 
     for (const feature of allFeatures) {
-        const featureName = feature.properties.NAME;
-        if (!featureName) continue;
+        const featureName = feature.properties.NAME || '';
+        const altName = feature.properties.ALT_NAME || '';
         const nameWords = featureName.toLowerCase().split(' ');
+        const altNameWords = altName.toLowerCase().split(' ');
 
         const distances = searchWords.map(searchWord => 
-            Math.min(...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)))
+            Math.min(
+                ...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)),
+                ...altNameWords.map(altNameWord => levenshteinDistance(searchWord, altNameWord))
+            )
         );
 
         const totalDistance = distances.reduce((a, b) => a + b, 0);
