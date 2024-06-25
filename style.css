@@ -29,8 +29,8 @@ body, html, #map {
 
 #search-input {
     padding: 5px;
-    font-size: 16px;
-    width: 200px;
+    font-size: 12px;
+    width: 150px;
 }
 
 #search-button {
@@ -42,8 +42,8 @@ body, html, #map {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px; /* Ensure circular shape */
-    height: 40px; /* Ensure circular shape */
+    width: 30px; /* Ensure circular shape */
+    height: 30px; /* Ensure circular shape */
     border-radius: 50%; /* Circular shape */
 }
 
@@ -85,7 +85,7 @@ body, html, #map {
 
 .suggestion {
     padding: 10px;
-    font-size: 12px; /* Smaller text */
+    font-size: 12px; 
     cursor: pointer;
 }
 
@@ -152,8 +152,8 @@ body, html, #map {
     position: absolute;
     background-color: #333;
     color: #fff;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 5px 5px;
+    border-radius: 2px;
     display: none;
     font-size: 14px;
     z-index: 2;
@@ -162,7 +162,7 @@ body, html, #map {
 /* Additional style for smaller tooltips */
 .small-tooltip {
     font-size: 12px;
-    padding: 3px 7px;
+    padding: 3px 4px;
     border-radius: 3px;
 }
 
