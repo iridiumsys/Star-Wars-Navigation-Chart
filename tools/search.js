@@ -81,6 +81,14 @@ function performSearch(system = null) {
         const nameWords = featureName.toLowerCase().split(' ');
         const altNameWords = altName.toLowerCase().split(' ');
 
+        // Exact match check
+        if (nameWords.some(word => searchWords.includes(word)) || 
+            altNameWords.some(word => searchWords.includes(word))) {
+            foundFeature = feature;
+            minDistance = 0;
+            break;
+        }
+
         const distances = searchWords.map(searchWord => 
             Math.min(
                 ...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)),
