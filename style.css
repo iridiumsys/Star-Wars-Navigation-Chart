@@ -33,6 +33,29 @@ body, html, #map {
     cursor: pointer;
 }
 
+#suggestions-container {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    width: calc(100% - 20px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 10; /* Ensure suggestions appear above other elements */
+}
+
+.suggestion {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
+}
+
+/* TOGGLE BACKGROUND */
+
 .toggle-background-container {
     display: flex;
     justify-content: center;
