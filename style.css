@@ -152,7 +152,7 @@ body, html, #map {
     position: absolute;
     background-color: #333;
     color: #fff;
-    padding: 5px 5px;
+    padding: 5px 6px;
     border-radius: 2px;
     display: none;
     font-size: 14px;
@@ -162,7 +162,7 @@ body, html, #map {
 /* Additional style for smaller tooltips */
 .small-tooltip {
     font-size: 12px;
-    padding: 3px 4px;
+    padding: 3px 7px;
     border-radius: 3px;
 }
 
