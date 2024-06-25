@@ -168,3 +168,19 @@ body, html, #map {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+
+/* Adjusted styles for button positioning */
+@media (min-width: 600px) {
+    .search-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #search-input {
+        width: calc(100% - 120px); /* Adjusted width to make space for the button */
+    }
+
+    #search-button {
+        margin-left: 10px; /* Margin to separate from the input */
+    }
+}
