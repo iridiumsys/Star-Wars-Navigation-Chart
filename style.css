@@ -20,9 +20,17 @@ body, html, #map {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 #search-input {
     padding: 5px;
     font-size: 16px;
+    width: 200px;
 }
 
 #search-button {
@@ -33,28 +41,33 @@ body, html, #map {
     cursor: pointer;
 }
 
+#search-button i {
+    font-size: 16px;
+}
+
 #suggestions-container {
     position: absolute;
+    top: 35px; /* Adjust based on input height */
+    left: 0;
     background-color: white;
     border: 1px solid #ccc;
     max-height: 200px;
     overflow-y: auto;
-    width: calc(100% - 20px);
+    width: 100%; /* Adjust based on input width */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     display: none;
     z-index: 10; /* Ensure suggestions appear above other elements */
 }
 
 .suggestion {
-    padding: 10px;
+    padding: 5px; /* Smaller padding */
     cursor: pointer;
+    font-size: 14px; /* Smaller font size */
 }
 
 .suggestion:hover {
     background-color: #f0f0f0;
 }
-
-/* TOGGLE BACKGROUND */
 
 .toggle-background-container {
     display: flex;
