@@ -12,6 +12,7 @@ body, html, #map {
     top: 10px;
     left: 10px;
     display: flex;
+    flex-direction: column;
     gap: 10px;
     background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;
@@ -19,23 +20,44 @@ body, html, #map {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-#search-input {
-    padding: 5px;
-    font-size: 12px; /* Smaller text */
-    flex-grow: 1;
+.search-input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-.target-circle-icon {
+#search-input {
+    padding: 5px;
+    font-size: 16px;
+    width: 200px;
+}
+
+#search-button {
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; /* Ensure circular shape */
+    height: 40px; /* Ensure circular shape */
+    border-radius: 50%; /* Circular shape */
+}
+
+#search-button .target-circle-icon {
     width: 16px;
     height: 16px;
-    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
+    background-color: white;
     border: 2px solid white;
     border-radius: 50%;
     display: inline-block;
     position: relative;
 }
 
-.target-circle-icon::before {
+#search-button .target-circle-icon::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -47,45 +69,23 @@ body, html, #map {
     transform: translate(-50%, -50%);
 }
 
-#search-button {
-    padding: 5px 10px;
-    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#search-button i {
-    font-size: 16px;
-    color: white;
-}
-
-.toggle-background-container {
+#suggestions-container {
     position: absolute;
-    top: 70px; /* Adjusted position under the search box */
-    left: 10px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 5px;
+    top: 35px; /* Adjust based on input height */
+    left: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%; /* Adjust based on input width */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-}
-
-#toggle-background {
-    padding: 5px 10px;
-    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
-    color: white;
-    border: none;
-    cursor: pointer;
+    display: none;
+    z-index: 10; /* Ensure suggestions appear above other elements */
 }
 
 .suggestion {
-    padding: 5px;
+    padding: 10px;
     font-size: 12px; /* Smaller text */
-    background-color: white;
     cursor: pointer;
 }
 
@@ -93,16 +93,18 @@ body, html, #map {
     background-color: #f0f0f0;
 }
 
-#suggestions-container {
-    position: absolute;
-    z-index: 2;
-    top: 40px; /* Adjusted position to be below the search box */
-    left: 10px;
-    background-color: white;
-    border: 1px solid #ccc;
-    width: calc(100% - 20px); /* Adjust width according to the container */
-    max-height: 200px;
-    overflow-y: auto;
+.toggle-background-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#toggle-background {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
 }
 
 .popup {
@@ -167,20 +169,4 @@ body, html, #map {
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-}
-
-/* Adjusted styles for button positioning */
-@media (min-width: 600px) {
-    .search-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    #search-input {
-        width: calc(100% - 120px); /* Adjusted width to make space for the button */
-    }
-
-    #search-button {
-        margin-left: 10px; /* Margin to separate from the input */
-    }
 }
