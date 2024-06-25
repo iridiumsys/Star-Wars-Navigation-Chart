@@ -73,7 +73,7 @@ function performSearch(system = null) {
     const searchWords = searchInput.toLowerCase().split(' ');
 
     let foundFeature = null;
-    let minDistance = Infinity;
+    let maxMatchCount = 0; // Track maximum number of matching words
 
     for (const feature of allFeatures) {
         const featureName = feature.properties.NAME || '';
@@ -81,30 +81,37 @@ function performSearch(system = null) {
         const nameWords = featureName.toLowerCase().split(' ');
         const altNameWords = altName.toLowerCase().split(' ');
 
+        let matchCount = 0;
+
         // Exact match check
         if (nameWords.some(word => searchWords.includes(word)) || 
             altNameWords.some(word => searchWords.includes(word))) {
             foundFeature = feature;
-            minDistance = 0;
+            maxMatchCount = searchWords.length; // Prefer full match
             break;
         }
 
-        const distances = searchWords.map(searchWord => 
-            Math.min(
-                ...nameWords.map(nameWord => levenshteinDistance(searchWord, nameWord)),
-                ...altNameWords.map(altNameWord => levenshteinDistance(searchWord, altNameWord))
-            )
-        );
+        // Count matching words
+        nameWords.forEach(word => {
+            if (searchWords.includes(word)) {
+                matchCount++;
+            }
+        });
 
-        const totalDistance = distances.reduce((a, b) => a + b, 0);
+        altNameWords.forEach(word => {
+            if (searchWords.includes(word)) {
+                matchCount++;
+            }
+        });
 
-        if (totalDistance < minDistance) {
-            minDistance = totalDistance;
+        // Prefer higher match count
+        if (matchCount > maxMatchCount) {
+            maxMatchCount = matchCount;
             foundFeature = feature;
         }
     }
 
-    if (foundFeature && minDistance < 3) { // Set a threshold for acceptable distance
+    if (foundFeature && maxMatchCount > 0) { // Ensure at least one word matched
         const coordinates = foundFeature.geometry.coordinates;
         map.flyTo({ center: coordinates, zoom: 20 });
     } else {
