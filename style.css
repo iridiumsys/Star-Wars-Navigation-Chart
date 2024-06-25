@@ -12,7 +12,6 @@ body, html, #map {
     top: 10px;
     left: 10px;
     display: flex;
-    flex-direction: column;
     gap: 10px;
     background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;
@@ -20,53 +19,26 @@ body, html, #map {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.search-input-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
 #search-input {
     padding: 5px;
-    font-size: 16px;
-    width: 200px;
+    font-size: 12px; /* Smaller text */
+    flex-grow: 1;
 }
 
 #search-button {
     padding: 5px 10px;
-    background-color: #4CAF50;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
     color: white;
     border: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #search-button i {
     font-size: 16px;
-}
-
-#suggestions-container {
-    position: absolute;
-    top: 35px; /* Adjust based on input height */
-    left: 0;
-    background-color: white;
-    border: 1px solid #ccc;
-    max-height: 200px;
-    overflow-y: auto;
-    width: 100%; /* Adjust based on input width */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    display: none;
-    z-index: 10; /* Ensure suggestions appear above other elements */
-}
-
-.suggestion {
-    padding: 5px; /* Smaller padding */
-    cursor: pointer;
-    font-size: 14px; /* Smaller font size */
-}
-
-.suggestion:hover {
-    background-color: #f0f0f0;
+    color: white;
 }
 
 .toggle-background-container {
@@ -81,6 +53,29 @@ body, html, #map {
     color: white;
     border: none;
     cursor: pointer;
+}
+
+.suggestion {
+    padding: 5px;
+    font-size: 12px; /* Smaller text */
+    background-color: white;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
+}
+
+#suggestions-container {
+    position: absolute;
+    z-index: 2;
+    top: 40px; /* Adjusted position to be below the search box */
+    left: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    width: calc(100% - 20px); /* Adjust width according to the container */
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .popup {
