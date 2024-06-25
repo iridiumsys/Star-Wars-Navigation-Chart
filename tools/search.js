@@ -40,7 +40,7 @@ function showSuggestions(value) {
         suggestions.forEach(system => {
             const suggestionElement = document.createElement('div');
             suggestionElement.className = 'suggestion';
-            suggestionElement.innerText = system.properties.NAME;
+            suggestionElement.innerText = `${system.properties.NAME} (${system.properties.Type2})`;
             suggestionElement.addEventListener('click', function() {
                 document.getElementById('search-input').value = system.properties.NAME;
                 performSearch(system);
