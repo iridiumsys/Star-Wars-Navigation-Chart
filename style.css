@@ -29,20 +29,44 @@ body, html, #map {
 
 #search-input {
     padding: 5px;
-    font-size: 16px;
-    width: 200px;
+    font-size: 12px;
+    width: 150px;
 }
 
 #search-button {
-    padding: 5px 10px;
-    background-color: #4CAF50;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark with small transparency */
     color: white;
     border: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Ensure circular shape */
+    height: 30px; /* Ensure circular shape */
+    border-radius: 50%; /* Circular shape */
 }
 
-#search-button i {
-    font-size: 16px;
+#search-button .target-circle-icon {
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+}
+
+#search-button .target-circle-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #suggestions-container {
@@ -60,9 +84,9 @@ body, html, #map {
 }
 
 .suggestion {
-    padding: 5px; /* Smaller padding */
+    padding: 10px;
+    font-size: 12px; 
     cursor: pointer;
-    font-size: 14px; /* Smaller font size */
 }
 
 .suggestion:hover {
@@ -128,8 +152,8 @@ body, html, #map {
     position: absolute;
     background-color: #333;
     color: #fff;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 5px 6px;
+    border-radius: 2px;
     display: none;
     font-size: 14px;
     z-index: 2;
