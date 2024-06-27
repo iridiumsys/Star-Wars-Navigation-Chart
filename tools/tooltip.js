@@ -11,7 +11,7 @@ document.body.appendChild(smallTooltip);
 function showTooltip(event, properties) {
     var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="tooltip-image">` : '';
     var tooltipContent = `<div class="tooltip-content">
-                            <h3>${properties.NAME}</h3>
+                            <h3>${properties.NAME.toUpperCase()}</h3>
                             ${imageTag}
                           </div>`;
 
