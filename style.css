@@ -44,7 +44,7 @@ body, html, #map {
     justify-content: center;
     width: 30px; /* Ensure circular shape */
     height: 30px; /* Ensure circular shape */
-    border-radius: 50%; /* Circular shape */
+    border-radius: 0 5px 5px 0; 
 }
 
 #search-button .target-circle-icon {
@@ -131,7 +131,7 @@ body, html, #map {
 
 .popup-info h3 {
     margin: 0 0 10px;
-    font-size: 1.2em;
+    font-size: 1em;
 }
 
 .popup-info p {
