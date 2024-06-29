@@ -34,7 +34,9 @@
 
     <script src="tools/search.js"></script>
     <script src="tools/tooltip.js"></script>
-    <script>
+    <script type="module">
+        import { setupBackgroundToggle } from './tools/toggleBackground.js';
+
         mapboxgl.accessToken = 'pk.eyJ1IjoibmVzcCIsImEiOiJjbHg1dDE5Mm4xY2h5Mmlxc2R2Mm95Y3ByIn0.Kp1Lcr9XD_u6oy8QOpvOZQ';
 
         // Function to initialize the map
@@ -114,14 +116,8 @@
                     }
                 });
 
-                // Toggle background functionality
-                let currentBackground = 'space-background';
-                document.getElementById('toggle-background').addEventListener('click', () => {
-                    const newBackground = currentBackground === 'space-background' ? 'white-background' : 'space-background';
-                    map.setLayoutProperty(currentBackground, 'visibility', 'none');
-                    map.setLayoutProperty(newBackground, 'visibility', 'visible');
-                    currentBackground = newBackground;
-                });
+                // Setup background toggle
+                setupBackgroundToggle(map);
             } catch (error) {
                 console.error('Error loading layers:', error);
             }
