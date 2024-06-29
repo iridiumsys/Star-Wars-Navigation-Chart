@@ -99,11 +99,11 @@
                             var properties = feature.properties;
 
                             var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
-                            var popupContent = <div class="popup">
-                                                    ${imageTag}
+                            var popupContent = `<div class="popup">
+                                                ${imageTag}
                                                     <div class="popup-info">
-                                                        <h3>${properties.NAME}</h3>
-                                                        ${properties.url_wookie ? <p><a href="${properties.url_wookie}" target="_blank">More Info</a></p> : ''}
+                                                    <h3>${properties.NAME}</h3>
+                                                ${properties.url_wookie ? `<p><a href="${properties.url_wookie}" target="_blank">More Info</a></p>` : ''}
                                                     </div>
                                                 </div>;
 
