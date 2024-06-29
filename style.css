@@ -182,7 +182,4 @@ body, html, #map {
     border-radius: 3px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+@keyframes
