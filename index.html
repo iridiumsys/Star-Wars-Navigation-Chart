@@ -98,7 +98,7 @@
                             var coordinates = feature.geometry.coordinates.slice();
                             var properties = feature.properties;
 
-                            var imageTag = properties.picture ? <img src="${properties.picture}" alt="System Image" class="popup-image"> : '';
+                            var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="popup-image">` : '';
                             var popupContent = <div class="popup">
                                                     ${imageTag}
                                                     <div class="popup-info">
