@@ -71,6 +71,8 @@ function showPopup(properties) {
     popup.innerHTML = popupContent;
 
     document.body.appendChild(popup);
+
+    console.log('Popup appended to body'); // Debugging line
 }
 
 // Function to close the popup
@@ -78,5 +80,6 @@ function closePopup() {
     var popup = document.querySelector('.popup');
     if (popup) {
         popup.remove();
+        console.log('Popup closed'); // Debugging line
     }
 }
