@@ -18,6 +18,11 @@ function showTooltip(event, properties) {
     tooltip.innerHTML = tooltipContent;
     tooltip.style.display = 'block';
     positionTooltip(event, tooltip);
+
+    // Add event listener to convert to popup on click
+    tooltip.addEventListener('click', function() {
+        showPopup(properties);
+    });
 }
 
 // Function to show small tooltip for other functionalities
@@ -48,3 +53,33 @@ document.addEventListener('mousemove', function(event) {
         positionTooltip(event, smallTooltip);
     }
 });
+
+// Function to show popup with system info
+function showPopup(properties) {
+    hideTooltip(); // Hide the tooltip when showing the popup
+
+    var imageTag = properties.picture ? `<img src="${properties.picture}" alt="System Image" class="tooltip-image">` : '';
+    var popupContent = `<div class="popup-info">
+                          <h3>${properties.NAME.toUpperCase()}</h3>
+                          ${imageTag}
+                          <p>${properties.Description || ''}</p>
+                          <button class="popup-close" onclick="closePopup()">×</button>
+                        </div>`;
+
+    var popup = document.createElement('div');
+    popup.setAttribute('class', 'popup');
+    popup.innerHTML = popupContent;
+
+    document.body.appendChild(popup);
+
+    console.log('Popup appended to body'); // Debugging line
+}
+
+// Function to close the popup
+function closePopup() {
+    var popup = document.querySelector('.popup');
+    if (popup) {
+        popup.remove();
+        console.log('Popup closed'); // Debugging line
+    }
+}

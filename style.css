@@ -8,7 +8,7 @@ body, html, #map {
 
 .search-container {
     position: absolute;
-    z-index: 1;
+    z-index: 10;
     top: 10px;
     left: 10px;
     display: flex;
@@ -118,6 +118,11 @@ body, html, #map {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000; /* Ensure it appears above other elements */
 }
 
 .popup img {
@@ -147,6 +152,17 @@ body, html, #map {
     text-decoration: underline;
 }
 
+.popup-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
 /* Style for general tooltip */
 .tooltip {
     position: absolute;
@@ -156,7 +172,7 @@ body, html, #map {
     border-radius: 2px;
     display: none;
     font-size: 14px;
-    z-index: 2;
+    z-index: 10;
 }
 
 /* Additional style for smaller tooltips */
@@ -166,7 +182,4 @@ body, html, #map {
     border-radius: 3px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+@keyframes
