@@ -3,8 +3,8 @@
         "space-background": {
             "type": "raster",
             "tiles": ["./XYZ_Space/{z}/{x}/{y}.png"],
-            "tileSize": 256,
-            "minzoom": 16,
+            "tileSize": 512,
+            "minzoom": 14,
             "maxzoom": 22
         },
         "white-background": {
